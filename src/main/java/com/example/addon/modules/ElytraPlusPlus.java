@@ -154,20 +154,14 @@ public class ElytraPlusPlus extends Module {
 
         Vec3d v = mc.player.getVelocity();
 		
-		if (mc.options.forwardKey.isPressed() && (mc.player.getPitch() > minPitch.get()) )
-            mc.player.setVelocity(v.add(forward));
-        else if (mc.options.backKey.isPressed())
-            mc.player.setVelocity(v.subtract(forward));
-		
-        v = mc.player.getVelocity();
-		
 		Vec3d c = new Vec3d(0,0,0);
 		
 		double _maxSpeed = maxSpeed.get() / 20.0d;
 		
-		if (v.distanceTo(c) > _maxSpeed ){
-			mc.player.setVelocity(v.multiply( _maxSpeed / v.distanceTo(c) ));
-		}
+		if (mc.options.forwardKey.isPressed() && (mc.player.getPitch() > minPitch.get()) && v.distanceTo(c) <= _maxSpeed)
+            mc.player.setVelocity(v.add(forward));
+        else if (mc.options.backKey.isPressed() || v.distanceTo(c) > _maxSpeed)
+            mc.player.setVelocity( (v.subtract(forward)) );
 		
 		
         

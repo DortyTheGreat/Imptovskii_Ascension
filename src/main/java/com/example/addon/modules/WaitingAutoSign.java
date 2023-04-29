@@ -4,6 +4,8 @@ package com.example.addon.modules;
 
 
 import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 
@@ -23,7 +25,14 @@ import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 public class WaitingAutoSign extends Module {
     private String[] _text;
 	
+	private OpenScreenEvent event_;
+	
+	private int ticker = 0;
+	
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
+	
+	
+	
 	private final Setting<Integer> timeMS = sgGeneral.add(new IntSetting.Builder()
         .name("waiting-time-in-ms")
         .description("???")
@@ -31,6 +40,43 @@ public class WaitingAutoSign extends Module {
         .min(0)
         .sliderMax(10000)
         .build()
+    );
+	
+	final SettingGroup sgExtra = settings.createGroup("Visible");
+	
+	 private final Setting<Boolean> typefrommenu = sgExtra.add(new BoolSetting.Builder()
+            .name("menu-prefab")
+            .description("True=input 4 lines from meteor menu, False= from first sign")
+            .defaultValue(false)
+            .build()
+    );
+	
+	private final Setting<String> lineOne = sgExtra.add(new StringSetting.Builder()
+            .name("line-one")
+            .description("What to put on the first line of the sign.")
+            .defaultValue("Steve")
+            .build()
+    );
+
+    private final Setting<String> lineTwo = sgExtra.add(new StringSetting.Builder()
+            .name("line-two")
+            .description("What to put on the second line of the sign.")
+            .defaultValue("did")
+            .build()
+    );
+
+    private final Setting<String> lineThree = sgExtra.add(new StringSetting.Builder()
+            .name("line-three")
+            .description("What to put on the third line of the sign.")
+            .defaultValue("nothing")
+            .build()
+    );
+
+    private final Setting<String> lineFour = sgExtra.add(new StringSetting.Builder()
+            .name("line-four")
+            .description("What to put on the Fourth line of the sign.")
+            .defaultValue("wrong.")
+            .build()
     );
 	
     public WaitingAutoSign() {
@@ -51,18 +97,25 @@ public class WaitingAutoSign extends Module {
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
-        if (!(event.screen instanceof SignEditScreen) || _text == null) return;
+        if (!(event.screen instanceof SignEditScreen) || (_text == null && !(typefrommenu.get())) ) return;
 
-        
-		setTimeout(() -> {
-			SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
-			mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), _text[0], _text[1], _text[2], _text[3]));
-
-        event.cancel();
+        event_ = event;
+		///try {Thread.sleep(timeMS.get());}catch(InterruptedException e){		}
+		setTimeout(this::DoTheThing,timeMS.get());
 				
-				}, timeMS.get());
+		event.cancel();
         
     }
+	
+	
+	private void DoTheThing(){
+		SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event_.screen).getSign();
+		if (typefrommenu.get())
+			mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), lineOne.get(),lineTwo.get(),lineThree.get(),lineFour.get()));
+		else
+			mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), _text[0], _text[1], _text[2], _text[3]));
+        event_.cancel();
+	}
 	
 	
 }
