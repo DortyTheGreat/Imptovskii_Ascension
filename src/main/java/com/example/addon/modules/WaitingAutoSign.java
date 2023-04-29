@@ -91,8 +91,10 @@ public class WaitingAutoSign extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof UpdateSignC2SPacket)) return;
-
-        _text = ((UpdateSignC2SPacket) event.packet).getText();
+		if (!(typefrommenu.get()))
+			_text = ((UpdateSignC2SPacket) event.packet).getText();
+		else
+			_text = null;
     }
 
     @EventHandler

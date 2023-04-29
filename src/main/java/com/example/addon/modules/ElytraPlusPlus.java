@@ -160,7 +160,8 @@ public class ElytraPlusPlus extends Module {
 		
 		if (mc.options.forwardKey.isPressed() && (mc.player.getPitch() > minPitch.get()) && v.distanceTo(c) <= _maxSpeed)
             mc.player.setVelocity(v.add(forward));
-        else if (mc.options.backKey.isPressed() || v.distanceTo(c) > _maxSpeed)
+		v = mc.player.getVelocity();
+        if (mc.options.backKey.isPressed() || v.distanceTo(c) > _maxSpeed)
             mc.player.setVelocity( (v.subtract(forward)) );
 		
 		
