@@ -1,6 +1,8 @@
+//file:noinspection JCenterRepository
+//file:noinspection GrDeprecatedAPIUsage
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
-	id 'maven-publish'
+    id 'fabric-loom' version '1.1-SNAPSHOT'
+    id 'maven-publish'
 }
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
@@ -10,8 +12,7 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-
-	jcenter()
+    jcenter()
 
     maven {
         name = "jitpack"
@@ -20,10 +21,12 @@ repositories {
 
     maven { url = "https://www.cursemaven.com" }
     maven { url = "https://masa.dy.fi/maven" }
+
     maven {
         name = "meteor-maven"
         url = "https://maven.meteordev.org/releases"
     }
+
     maven {
         name = "meteor-maven-snapshots"
         url = "https://maven.meteordev.org/snapshots"
@@ -31,22 +34,24 @@ repositories {
 }
 
 dependencies {
-    // Fabric
+    // Minecraft
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Meteor
     modImplementation "meteordevelopment:meteor-client:${project.meteor_version}"
-	
-	//litematica
+    modImplementation "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
+
+    //litematica
     modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"
     modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.minecraft_version}:${project.malilib_version}"
+
 }
 
 processResources {
     filesMatching("fabric.mod.json") {
-        expand "version": project.version, "mc_version": project.minecraft_version
+        expand "version": project.version
     }
 }
 

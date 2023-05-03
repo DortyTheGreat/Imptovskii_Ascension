@@ -1,7 +1,7 @@
 // https://github.com/kkllffaa/meteor-litematica-printer/blob/main/src/main/java/com/kkllffaa/meteor_litematica_printer/Printer.java
 package com.example.addon.modules;
 
-import static com.example.addon.BuildUtils.*; 
+import com.example.addon.BuildUtils; 
 
 import java.util.ArrayList;
 import java.util.Comparator;
