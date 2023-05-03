@@ -42,6 +42,24 @@ public class WaitingAutoSign extends Module {
         .build()
     );
 	
+	private final Setting<Integer> tries = sgGeneral.add(new IntSetting.Builder()
+        .name("packet-tries")
+        .description("How many times shall this module send the packet")
+        .defaultValue(1)
+        .min(1)
+        .sliderMax(10)
+        .build()
+    );
+	
+	private final Setting<Integer> tries_interval = sgGeneral.add(new IntSetting.Builder()
+        .name("packet-tries-interval")
+        .description("Time beetween retries in MS")
+        .defaultValue(500)
+        .min(1)
+        .sliderMax(2000)
+        .build()
+    );
+	
 	final SettingGroup sgExtra = settings.createGroup("Visible");
 	
 	 private final Setting<Boolean> typefrommenu = sgExtra.add(new BoolSetting.Builder()
@@ -55,6 +73,7 @@ public class WaitingAutoSign extends Module {
             .name("line-one")
             .description("What to put on the first line of the sign.")
             .defaultValue("Steve")
+			.visible(() -> typefrommenu.get())
             .build()
     );
 
@@ -62,6 +81,7 @@ public class WaitingAutoSign extends Module {
             .name("line-two")
             .description("What to put on the second line of the sign.")
             .defaultValue("did")
+			.visible(() -> typefrommenu.get())
             .build()
     );
 
@@ -69,6 +89,7 @@ public class WaitingAutoSign extends Module {
             .name("line-three")
             .description("What to put on the third line of the sign.")
             .defaultValue("nothing")
+			.visible(() -> typefrommenu.get())
             .build()
     );
 
@@ -76,6 +97,7 @@ public class WaitingAutoSign extends Module {
             .name("line-four")
             .description("What to put on the Fourth line of the sign.")
             .defaultValue("wrong.")
+			.visible(() -> typefrommenu.get())
             .build()
     );
 	
@@ -103,7 +125,11 @@ public class WaitingAutoSign extends Module {
 
         event_ = event;
 		///try {Thread.sleep(timeMS.get());}catch(InterruptedException e){		}
-		setTimeout(this::DoTheThing,timeMS.get());
+		
+		for(int i = 0; i < tries.get(); ++i){
+			setTimeout(this::DoTheThing,timeMS.get() + tries_interval.get() * i);
+		}
+		/// sign.getTextOnRow
 				
 		event.cancel();
         

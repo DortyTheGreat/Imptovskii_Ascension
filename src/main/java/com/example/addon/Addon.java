@@ -26,6 +26,7 @@ public class Addon extends MeteorAddon {
 		Modules.get().add(new sphere());
 		Modules.get().add(new ElytraPlusPlus());
 		Modules.get().add(new WaitingAutoSign());
+		Modules.get().add(new AutoLogin());
 		
         // Commands
         Commands.get().add(new CommandExample());
