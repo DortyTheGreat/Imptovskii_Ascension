@@ -102,7 +102,7 @@ public class AutoLogin extends Module {
 		
         if ( !(timer >= delay.get() && !loginCommand.get().isEmpty() && work) ) {
 			timer ++;
-			return
+			return;
 		}
 		
 		timer = 0;
