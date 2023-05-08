@@ -62,7 +62,7 @@ public class WaitingAutoSign extends Module {
 	
 	final SettingGroup sgExtra = settings.createGroup("Visible");
 	
-	 private final Setting<Boolean> typefrommenu = sgExtra.add(new BoolSetting.Builder()
+	private final Setting<Boolean> typefrommenu = sgExtra.add(new BoolSetting.Builder()
             .name("menu-prefab")
             .description("True=input 4 lines from meteor menu, False= from first sign")
             .defaultValue(false)
@@ -98,6 +98,14 @@ public class WaitingAutoSign extends Module {
             .description("What to put on the Fourth line of the sign.")
             .defaultValue("wrong.")
 			.visible(() -> typefrommenu.get())
+            .build()
+    );
+	
+	
+	private final Setting<Boolean> notifyUponPlace = sgExtra.add(new BoolSetting.Builder()
+            .name("notify-upon-place")
+            .description("notify with a message upon sign placed")
+            .defaultValue(false)
             .build()
     );
 	
@@ -137,6 +145,9 @@ public class WaitingAutoSign extends Module {
 	
 	
 	private void DoTheThing(){
+		if ( notifyUponPlace.get()){
+			info("sign placed");
+		}
 		SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event_.screen).getSign();
 		if (typefrommenu.get())
 			mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), lineOne.get(),lineTwo.get(),lineThree.get(),lineFour.get()));

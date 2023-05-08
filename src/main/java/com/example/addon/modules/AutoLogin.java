@@ -22,7 +22,7 @@ public class AutoLogin extends Module {
 	
 	private final Setting<Boolean> fromFile = sgGeneral.add(new BoolSetting.Builder()
         .name("from-file")
-        .description("Use Auto Login only on server.")
+        .description("Use File as password storage. locate at .minecraft/passwords.txt. type in SERVER NICK PASSWORD ENDL ... ")
         .defaultValue(true)
         .build()
     );
@@ -48,6 +48,22 @@ public class AutoLogin extends Module {
         .defaultValue(20)
         .range(1, 120)
         .sliderRange(1, 40)
+        .build()
+    );
+	
+	
+	private final Setting<Boolean> debugPrint = sgGeneral.add(new BoolSetting.Builder()
+        .name("debug-print")
+        .description("prints messages for debugin this bit")
+        .defaultValue(true)
+        .build()
+    );
+	
+	private final Setting<Boolean> debugServer = sgGeneral.add(new BoolSetting.Builder()
+        .name("debug-print-server-ip")
+        .description("prints message of current server ip")
+		.visible(() -> debugPrint.get())
+        .defaultValue(true)
         .build()
     );
 
@@ -84,50 +100,63 @@ public class AutoLogin extends Module {
 		
 		
 		
-        if (timer >= delay.get() && !loginCommand.get().isEmpty() && work) {
-            work = false;
-			if (fromFile.get()){
-				info("reading file...");
-				boolean logged = false;
-				try {
-					FileReader reader = new FileReader("passwords.txt");
-					BufferedReader bufferedReader = new BufferedReader(reader);
-		 
-					String line;
-		 
-					while ((line = bufferedReader.readLine()) != null) {
+        if ( !(timer >= delay.get() && !loginCommand.get().isEmpty() && work) ) {
+			timer ++;
+			return
+		}
+		
+		timer = 0;
+		work = false;
+		if (!fromFile.get()){
+			ChatUtils.sendPlayerMsg("/" + loginCommand.get());
+			return;
+		}
+		if (debugPrint.get()){
+			info("reading file...");
+			if ( debugServer.get()){
+				info("Server is " + Utils.getWorldName());
+			}
+			
+		}
 
-						String[] dataa = line.split(" ");
-						
-						
-						
-						if (dataa[0].equals(Utils.getWorldName()) && dataa[1].equals( (mc.player.getName().getString()) )){
-							ChatUtils.sendPlayerMsg("/login " + dataa[2]);
-							logged = true;
-							break;
-							
-						}
-						
-					}
+		try {
+			FileReader reader = new FileReader("passwords.txt");
+			BufferedReader bufferedReader = new BufferedReader(reader);
+ 
+			String line;
+ 
+			while ((line = bufferedReader.readLine()) != null) {
+
+				String[] dataa = line.split(" ");
+				
+				
+				
+				if (dataa[0].equals(Utils.getWorldName()) && dataa[1].equals( (mc.player.getName().getString()) )){
+					ChatUtils.sendPlayerMsg("/login " + dataa[2]);
 					reader.close();
-		 
-				} catch (IOException e) {
-					e.printStackTrace();
+					return;
+					
 				}
 				
-				if (!logged){
-					info("Oops, password seems missing");
-				}
-			}else{
-				ChatUtils.sendPlayerMsg("/" + loginCommand.get());
-				//mc.player.sendChatMessage(loginCommand.get().replace("/", ""));
 			}
-            timer = 0;
-        } else timer ++;
+			
+ 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+		info("Oops, password seems missing");
+		
+		
+
+        
     }
 
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         work = true;
     }
+	
+
 }
