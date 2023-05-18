@@ -186,13 +186,11 @@ public class ChatBot extends Module {
     private void onMessageRecieve(ReceiveMessageEvent event) {
 		
 		String msg = event.getMessage().getString();
-		///info("received: " + msg);
-		info("received");
-		info(msg);
+		
 		/*
 		if ( CryptoWork.get()){
 			try{
-				String decoded = new String(Base64.decodeBase64(msg.getBytes()));
+				String decoded = new String(Base64.decodeBase64(msg));
 				info("decoded to: " + decoded);
 				if (decoded.startsWith(Secret_Data.get())){
 					
@@ -264,17 +262,17 @@ public class ChatBot extends Module {
 		if ( CryptoWork.get()){
 			if (message.startsWith(prefix_bypass.get())) return;
 			
-			String decoded = new String(Base64.decodeBase64(message.getBytes()));
-			info("decoded to " + decoded);
+			String decoded = new String(Base64.decodeBase64(message));
+			//info("decoded to " + decoded);
 			if (decoded.startsWith(Secret_Data.get())) return; /// сообщение уже в стандарте, отправляем его
 			
 			// Encode data on your side using BASE64
 			
 			message = Secret_Data.get() + message;
 			String encoded_mesg = new String(Base64.encodeBase64(message.getBytes()));
-			info("encoded to " + encoded_mesg);
-			//ChatUtils.sendPlayerMsg(encoded_mesg);
-			//event.cancel();
+			//info("encoded to " + encoded_mesg);
+			ChatUtils.sendPlayerMsg(encoded_mesg);
+			event.cancel();
 		}
 		
 	 }
