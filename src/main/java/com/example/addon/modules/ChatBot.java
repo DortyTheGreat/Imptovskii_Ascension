@@ -37,6 +37,7 @@ import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 
 import org.apache.commons.codec.binary.Base64;
 
+import java.util.TextUtils;
 
 public class ChatBot extends Module {
 
@@ -186,12 +187,13 @@ public class ChatBot extends Module {
     private void onMessageRecieve(ReceiveMessageEvent event) {
 		
 		String msg = event.getMessage().getString();
-		
+		if (msg != null )
+			info( Integer.toString(msg.length()) );
 		/*
 		if ( CryptoWork.get()){
 			try{
 				String decoded = new String(Base64.decodeBase64(msg));
-				info("decoded to: " + decoded);
+				info(decoded);
 				if (decoded.startsWith(Secret_Data.get())){
 					
 					if (!show_encoded.get()) event.cancel();
@@ -204,6 +206,7 @@ public class ChatBot extends Module {
 			}
 		}
 		*/
+		
 		
 		
 		if ( !BotWork.get()) return;
