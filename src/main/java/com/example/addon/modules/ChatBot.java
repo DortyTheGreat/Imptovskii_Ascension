@@ -32,13 +32,28 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+
+import meteordevelopment.meteorclient.events.game.SendMessageEvent;
+
+import org.apache.commons.codec.binary.Base64;
+
+
 public class ChatBot extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
+	
+	
+	private final Setting<Boolean> BotWork = sgGeneral.add(new BoolSetting.Builder()
+            .name("TurnOnBot")
+            .description("Determine whether the bot should work or not")
+            .defaultValue(true)
+            .build()
+    );
+	
     private final Setting<String> prefix = sgGeneral.add(new StringSetting.Builder()
             .name("prefix")
             .description("Command prefix for the bot.")
+			.visible(() -> BotWork.get())
             .defaultValue("!")
             .build()
     );
@@ -46,14 +61,18 @@ public class ChatBot extends Module {
     private final Setting<Boolean> help = sgGeneral.add(new BoolSetting.Builder()
             .name("help")
             .description("Add help command.")
+			.visible(() -> BotWork.get())
             .defaultValue(true)
             .build()
     );
-
+	
+	
+	
     private final Setting<Map<String, String>> commands = sgGeneral.add(new StringMapSetting.Builder()
             .name("commands")
             .description("Commands.")
             .renderer(StarscriptTextBoxRenderer.class)
+			.visible(() -> BotWork.get())
             .defaultValue(new LinkedHashMap<>() {{
                 put("ping", "Pong!");
                 put("tps", "Current TPS: {server.tps}");
@@ -74,7 +93,7 @@ public class ChatBot extends Module {
 				put("faq", "https://www.new-places.ru/faq/");
 				put("FAQ", "https://www.new-places.ru/faq/");
 				
-				put("end", "nether - 100 200");
+				put("end", "nether = 100 200, over = 877 1803");
 				
 				put("seed", "9172939576280861554 - over seed.");
 				
@@ -87,9 +106,51 @@ public class ChatBot extends Module {
         .name("delay")
         .description("Delay before send text in ticks (20 ticks = 1 sec).")
         .defaultValue(60)
+		.visible(() -> BotWork.get())
         .range(1, 240)
         .sliderRange(1, 40)
         .build()
+    );
+	
+	private final Setting<Boolean> Debug = sgGeneral.add(new BoolSetting.Builder()
+            .name("Debug")
+            .description("-")
+			.visible(() -> BotWork.get())
+            .defaultValue(true)
+            .build()
+    );
+	
+	
+	
+	private final Setting<Boolean> CryptoWork = sgGeneral.add(new BoolSetting.Builder()
+            .name("TurnOnCrypto")
+            .description("Determine whether the crypto of chat shall work")
+            .defaultValue(true)
+            .build()
+    );
+	
+	private final Setting<String> Secret_Data = sgGeneral.add(new StringSetting.Builder()
+            .name("secret_data")
+            .description("some cool stuff")
+			.visible(() -> CryptoWork.get())
+            .defaultValue("abobus")
+            .build()
+    );
+	
+	private final Setting<String> prefix_bypass = sgGeneral.add(new StringSetting.Builder()
+            .name("prefix_bypass")
+            .description("ooof")
+			.visible(() -> CryptoWork.get())
+            .defaultValue("___")
+            .build()
+    );
+	
+	private final Setting<Boolean> show_encoded = sgGeneral.add(new BoolSetting.Builder()
+            .name("show-shit")
+            .description("shall we show encoded messages ?")
+			.visible(() -> CryptoWork.get())
+            .defaultValue(true)
+            .build()
     );
 	
 	private Queue<String> queue = new LinkedList<>();
@@ -123,7 +184,24 @@ public class ChatBot extends Module {
 
     @EventHandler
     private void onMessageRecieve(ReceiveMessageEvent event) {
-        String msg = event.getMessage().getString();
+		
+		String msg = event.getMessage().getString();
+		info("received: " + msg);
+		if ( CryptoWork.get()){
+			String decoded = new String(Base64.decodeBase64(msg.getBytes()));
+			info("decoded to: " + decoded);
+			if (decoded.startsWith(Secret_Data.get())){
+				
+				if (!show_encoded.get()) event.cancel();
+				info(decoded);
+				/// event.cancel ?
+			}
+		}
+		
+		
+		if ( !BotWork.get()) return;
+		
+        
         if (help.get() && msg.endsWith(prefix.get() + "help")) {
             queue.offer("Available commands: " + String.join(", ", commands.get().keySet()));
 			
@@ -157,13 +235,37 @@ public class ChatBot extends Module {
     }
 	
 	
+
 	@EventHandler
-    private void onPacketSent(PacketEvent.Send event) {
-
-
-        if (event.packet instanceof ChatMessageC2SPacket packet) {
-            info("I sent a packet");
+	private void onMessageSend(SendMessageEvent event) {
+		String message = event.message;
+		if ( BotWork.get() ){
+			if (Debug.get()) info("I sent a packet");
 			timer = 0;
         }
-    }
+		
+		/**
+		Игрок посылает: Ёу, здарова всем!
+		Этот ивент отменяет сообщение, т.к. не проходит стандарты. (В конце нет приписки)
+		
+		Его дописывают в "{{SECRET_STUFF}}Ёу, здарова всем!"
+		*/
+		
+		
+		if ( CryptoWork.get()){
+			if (message.startsWith(prefix_bypass.get())) return;
+			
+			String decoded = new String(Base64.decodeBase64(message.getBytes()));
+			
+			if (decoded.startsWith(Secret_Data.get())) return; /// сообщение уже в стандарте, отправляем его
+			
+			// Encode data on your side using BASE64
+			
+			message = Secret_Data.get() + message;
+			String encoded_mesg = new String(Base64.encodeBase64(message.getBytes()));
+			ChatUtils.sendPlayerMsg(encoded_mesg);
+			event.cancel();
+		}
+		
+	 }
 }
