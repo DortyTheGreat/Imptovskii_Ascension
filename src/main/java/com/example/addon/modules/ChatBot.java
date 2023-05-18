@@ -186,17 +186,26 @@ public class ChatBot extends Module {
     private void onMessageRecieve(ReceiveMessageEvent event) {
 		
 		String msg = event.getMessage().getString();
-		info("received: " + msg);
+		///info("received: " + msg);
+		info("received");
+		info(msg);
+		/*
 		if ( CryptoWork.get()){
-			String decoded = new String(Base64.decodeBase64(msg.getBytes()));
-			info("decoded to: " + decoded);
-			if (decoded.startsWith(Secret_Data.get())){
+			try{
+				String decoded = new String(Base64.decodeBase64(msg.getBytes()));
+				info("decoded to: " + decoded);
+				if (decoded.startsWith(Secret_Data.get())){
+					
+					if (!show_encoded.get()) event.cancel();
+					info(decoded);
+					/// event.cancel ?
+				}
+			}
+			catch(Exception e){
 				
-				if (!show_encoded.get()) event.cancel();
-				info(decoded);
-				/// event.cancel ?
 			}
 		}
+		*/
 		
 		
 		if ( !BotWork.get()) return;
@@ -256,15 +265,16 @@ public class ChatBot extends Module {
 			if (message.startsWith(prefix_bypass.get())) return;
 			
 			String decoded = new String(Base64.decodeBase64(message.getBytes()));
-			
+			info("decoded to " + decoded);
 			if (decoded.startsWith(Secret_Data.get())) return; /// сообщение уже в стандарте, отправляем его
 			
 			// Encode data on your side using BASE64
 			
 			message = Secret_Data.get() + message;
 			String encoded_mesg = new String(Base64.encodeBase64(message.getBytes()));
-			ChatUtils.sendPlayerMsg(encoded_mesg);
-			event.cancel();
+			info("encoded to " + encoded_mesg);
+			//ChatUtils.sendPlayerMsg(encoded_mesg);
+			//event.cancel();
 		}
 		
 	 }

