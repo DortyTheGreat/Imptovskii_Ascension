@@ -37,7 +37,6 @@ import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 
 import org.apache.commons.codec.binary.Base64;
 
-import java.util.TextUtils;
 
 public class ChatBot extends Module {
 
@@ -187,8 +186,9 @@ public class ChatBot extends Module {
     private void onMessageRecieve(ReceiveMessageEvent event) {
 		
 		String msg = event.getMessage().getString();
-		if (msg != null )
-			info( Integer.toString(msg.length()) );
+	
+		
+		
 		/*
 		if ( CryptoWork.get()){
 			try{
