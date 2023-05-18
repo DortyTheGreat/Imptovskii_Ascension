@@ -259,7 +259,7 @@ public class ChatBot extends Module {
 		*/
 		
 		
-		if ( CryptoWork.get()){
+		if ( CryptoWork.get()){ 
 			if (message.startsWith(prefix_bypass.get())) return;
 			
 			String decoded = new String(Base64.decodeBase64(message));
