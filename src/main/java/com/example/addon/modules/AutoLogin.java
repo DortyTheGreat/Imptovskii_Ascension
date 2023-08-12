@@ -27,6 +27,14 @@ public class AutoLogin extends Module {
         .build()
     );
 	
+	private final Setting<String> file_name = sgGeneral.add(new StringSetting.Builder()
+        .name("file-name")
+        .description("name for a file that would contain the passwords (stores in .minecraft folder)")
+		.visible(() -> fromFile.get())
+        .defaultValue("passwords.txt")
+        .build()
+    );
+	
     private final Setting<String> loginCommand = sgGeneral.add(new StringSetting.Builder()
         .name("login-command")
         .description("Command to login.")
@@ -78,7 +86,7 @@ public class AutoLogin extends Module {
     public void onActivate() {
 		
 		try {
-			File myObj = new File("passwords.txt");
+			File myObj = new File(file_name.get());
 			if (myObj.createNewFile()) {
 				System.out.println("File created: " + myObj.getName());
 			} else {
@@ -120,7 +128,7 @@ public class AutoLogin extends Module {
 		}
 
 		try {
-			FileReader reader = new FileReader("passwords.txt");
+			FileReader reader = new FileReader(file_name.get());
 			BufferedReader bufferedReader = new BufferedReader(reader);
  
 			String line;

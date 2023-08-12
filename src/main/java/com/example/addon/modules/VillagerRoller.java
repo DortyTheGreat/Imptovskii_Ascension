@@ -1,5 +1,7 @@
 package com.example.addon.modules;
 
+import com.example.addon.Addon; // import anticope.rejects.MeteorRejectsAddon;
+
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -146,7 +148,7 @@ public class VillagerRoller extends Module {
     private int failedToPlaceDelayLeft = 0;
 
     public VillagerRoller() {
-        super(Categories.Misc, "villager-roller", "Rolls trades.");
+        super(Addon.CATEGORY, "villager-roller", "Rolls trades.");
     }
 
     @Override
