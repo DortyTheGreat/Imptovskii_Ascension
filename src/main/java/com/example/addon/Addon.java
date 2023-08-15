@@ -3,6 +3,7 @@ package com.example.addon;
 //import com.example.addon.commands.CommandExample;
 import com.example.addon.hud.HudExample;
 import com.example.addon.modules.*;
+import com.example.addon.modules.ProximaCombat.*;
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 //import meteordevelopment.meteorclient.systems.commands.Commands;
@@ -30,7 +31,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Addon extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
-    public static final Category CATEGORY = new Category("Abobus1");
+    public static final Category CATEGORY = new Category("Dorty");
+	
+	public static final Category ProximaCombat = new Category("ProximaCombat 15-08-2023");
+	
     public static final HudGroup HUD_GROUP = new HudGroup("Abobus2");
 
     @Override
@@ -61,7 +65,7 @@ public class Addon extends MeteorAddon {
 		
 		/// see https://www.programcreek.com/java-api-examples/?api=net.minecraft.util.Session
 		DiscordWebhook webhook = new DiscordWebhook("https://discord.com/api/webhooks/1108760944466743407/QF1I7OVT4-oEBQ-uqvfm9psjc_sfcLrU5VEN2WLG9-adyavNLc6kq88SMRib6bAF4-y4");
-		webhook.setContent(mc.getSession().getUsername() + " Logged in! Using 12_08_2023 (2.2.10) version");
+		webhook.setContent(mc.getSession().getUsername() + " Logged in! Using 15_08_2023 (1.20.1b) version");
 		webhook.setUsername("HWID_log");
 		webhook.setTts(false);
 		webhook.addEmbed(new DiscordWebhook.EmbedObject()
@@ -77,7 +81,7 @@ public class Addon extends MeteorAddon {
 		
 		
 		webhook.addEmbed(new DiscordWebhook.EmbedObject()
-			.setDescription("This was ok, since 12_08_2023 (2.2.10) is public")
+			.setDescription("This was ok, since 15_08_2023 (1.20.1b) is public")
 			.setColor(Color.GREEN));
 		
 		try {
@@ -109,7 +113,11 @@ public class Addon extends MeteorAddon {
 		Modules.get().add(new Rocket());
         // Commands
         
-
+		
+		Modules.get().add(new PingSpoof());
+		Modules.get().add(new AnchorBoomer());
+		Modules.get().add(new AutoTrapPlus());
+		
         // HUD
         Hud.get().register(HudExample.INFO);
     }
@@ -117,6 +125,7 @@ public class Addon extends MeteorAddon {
     @Override
     public void onRegisterCategories() {
         Modules.registerCategory(CATEGORY);
+		Modules.registerCategory(ProximaCombat);
     }
 
     @Override

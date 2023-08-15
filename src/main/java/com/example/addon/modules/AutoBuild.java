@@ -310,7 +310,7 @@ public class AutoBuild extends Module {
     public AutoBuild() {super(Addon.CATEGORY, "auto-build", " ");}
     private boolean p(int x, int y, int z) {
         clearBlockPosition(x, y, z);BlockState blockState = mc.world.getBlockState(blockPos);
-        if (!blockState.getMaterial().isReplaceable()) return true;
+        if (!blockState.isReplaceable()) return true;
         if (BlockUtils.place(blockPos, InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 100)) {
             place = true;
         }
@@ -319,7 +319,7 @@ public class AutoBuild extends Module {
 
     private boolean b(int x, int y, int z) {
         clearBlockPosition(x, y, z);BlockState blockState = mc.world.getBlockState(blockPos);
-        if (!blockState.getMaterial().isReplaceable()) return true;
+        if (!blockState.isReplaceable()) return true;
         if (BlockUtils.place(blockPos, InvUtils.findInHotbar(Items.SOUL_SAND), rotate.get(), 100)) {
             place = true;
         }
@@ -328,7 +328,7 @@ public class AutoBuild extends Module {
 
     private boolean h(int x, int y, int z) {
         clearBlockPosition(x, y, z);BlockState blockState = mc.world.getBlockState(blockPos);
-        if (!blockState.getMaterial().isReplaceable()) return true;
+        if (!blockState.isReplaceable()) return true;
         if (BlockUtils.place(blockPos, InvUtils.findInHotbar(Items.WITHER_SKELETON_SKULL), rotate.get(), 100)) {
             place = true;
         }

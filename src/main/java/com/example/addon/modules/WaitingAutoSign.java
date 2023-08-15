@@ -19,7 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
+import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 
 public class WaitingAutoSign extends Module {
@@ -49,6 +49,16 @@ public class WaitingAutoSign extends Module {
         .min(1)
         .sliderMax(10)
         .build()
+    );
+	
+	/// https://maven.fabricmc.net/docs/yarn-1.16.4+build.1/net/minecraft/network/packet/c2s/play/UpdateSignC2SPacket.html
+	/// ЧТО ЗА ЕБУЧИЙ БУЛЬ???????? (ладно, вероятнее всего это что-то типо изменение или новая табличка..)
+	/// EDIT: через 5 минут допёр зайти на метеорю Там просто стоит тру. Хз почему, пусть будет у меня так...
+	private final Setting<Boolean> buul = sgGeneral.add(new BoolSetting.Builder()
+            .name("Buul")
+            .description("YA VOOBSHE NE EBU SHTO ETO!! 1 20 NOVIE TREBOVANIYA NA KAKOYTO BUL, ODNAKO ETOGO GOVNA NET V DOKUMENTACII!!")
+            .defaultValue(true)
+            .build()
     );
 	
 	private final Setting<Integer> tries_interval = sgGeneral.add(new IntSetting.Builder()
@@ -129,7 +139,7 @@ public class WaitingAutoSign extends Module {
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
-        if (!(event.screen instanceof SignEditScreen) || (_text == null && !(typefrommenu.get())) ) return;
+        if (!(event.screen instanceof AbstractSignEditScreen) || (_text == null && !(typefrommenu.get())) ) return;
 
         event_ = event;
 		///try {Thread.sleep(timeMS.get());}catch(InterruptedException e){		}
@@ -150,9 +160,9 @@ public class WaitingAutoSign extends Module {
 		}
 		SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event_.screen).getSign();
 		if (typefrommenu.get())
-			mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), lineOne.get(),lineTwo.get(),lineThree.get(),lineFour.get()));
+			mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), buul.get(), lineOne.get(),lineTwo.get(),lineThree.get(),lineFour.get()));
 		else
-			mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), _text[0], _text[1], _text[2], _text[3]));
+			mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), buul.get(), _text[0], _text[1], _text[2], _text[3]));
         event_.cancel();
 	}
 	

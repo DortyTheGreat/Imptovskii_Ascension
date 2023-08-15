@@ -47,6 +47,26 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
+
+import meteordevelopment.meteorclient.mixininterface.ISlot;
+import meteordevelopment.meteorclient.utils.render.PeekScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.Pair;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+
+
 public class Printer extends Module {
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
 	private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
@@ -240,8 +260,8 @@ public class Printer extends Module {
 
 				if (
 						mc.player.getBlockPos().isWithinDistance(pos, printing_range.get()) 
-						&& blockState.getMaterial().isReplaceable()
-						&& !required.getMaterial().isLiquid()
+						&& blockState.isReplaceable()
+						&& !required.isLiquid()
 						&& !required.isAir() 
 						&& blockState.getBlock() != required.getBlock() 
 						&& DataManager.getRenderLayerRange().isPositionWithinRange(pos) 
@@ -317,7 +337,7 @@ public class Printer extends Module {
 	public boolean place(BlockState required, BlockPos pos) {
 		
 		if (mc.player == null || mc.world == null) return false;
-		if (!mc.world.getBlockState(pos).getMaterial().isReplaceable()) return false;
+		if (!mc.world.getBlockState(pos).isReplaceable()) return false;
 		
 		Direction wantedSide = advanced.get() ? dir(required) : null;
 
@@ -352,8 +372,8 @@ public class Printer extends Module {
 			mc.player.getMainHandStack().getItem() == item ||
 			isCreative &&
 			mc.player.getMainHandStack().getItem() == item &&
-			ItemStack
-			.areNbtEqual(
+			
+			ItemStack.areEqual(
 			mc.player.getMainHandStack()
 			,
 			requiredItemStack)
@@ -371,7 +391,7 @@ public class Printer extends Module {
 			usedSlot != -1 &&
 			mc.player.getInventory().getStack(usedSlot).getItem() == item &&
 			ItemStack
-			.areNbtEqual(
+			.areEqual(
 			mc.player.getInventory().getStack(usedSlot),
 			requiredItemStack)
 		) {
@@ -391,7 +411,7 @@ public class Printer extends Module {
 			result.found() &&
 			result.slot() != -1 &&
 			ItemStack
-			.areNbtEqual(
+			.areEqual(
 			requiredItemStack, 
 			mc.player.getInventory().getStack(result.slot())
 			)

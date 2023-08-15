@@ -1590,7 +1590,7 @@ public class sphere extends Module {
     private boolean place(int x, int y, int z) {
         setBlockPos(x, y, z);
         BlockState blockState = mc.world.getBlockState(blockPos);
-        if (!blockState.getMaterial().isReplaceable()) return true;
+        if (!blockState.isReplaceable()) return true;
         if (BlockUtils.place(blockPos, InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem()))), rotate.get(), 100, checkEntity.get())) {
             return_ = true;
         }

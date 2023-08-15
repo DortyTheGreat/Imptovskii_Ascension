@@ -64,15 +64,16 @@ public class Rocket extends Module {
         .sliderMax(181)
         .build()
     );
-	
+	/**
 	private final Setting<Integer> Priority = sgGeneral.add(new IntSetting.Builder()
-        .name("Roll-Focus")
+        .name("Priority")
         .description("I have no idea what that is")
         .defaultValue(50)
         .min(-100000)
         .sliderMax(100000)
         .build()
     );
+	*/
 	
 	
 
@@ -123,7 +124,9 @@ public class Rocket extends Module {
         float yaw = (float) Math.toRadians(mc.player.getYaw());
         
 
-		Rotations.rotate(mc.player.getYaw(), pitchFocus.get(), Priority.get());
+	
+		
+		mc.player.setPitch(pitchFocus.get().floatValue());
 		
 		Vec3d forward = new Vec3d(-MathHelper.sin(yaw) * 0.05 * acceleration.get(), 0, /* for the legacy mode*/
             MathHelper.cos(yaw) * 0.05 * acceleration.get());
