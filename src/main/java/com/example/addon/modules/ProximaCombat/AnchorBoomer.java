@@ -49,9 +49,6 @@ import java.util.stream.Collectors;
 import static com.example.addon.utils.RenderUtil.*;
 
 
-
-
-
 public class AnchorBoomer extends Module {
     public AnchorBoomer(){
         super(Addon.ProximaCombat, "anchor-boomer", "Fixed at 15-08-2023, by Dorty for 1.20.1b IA release. Made from some sources");

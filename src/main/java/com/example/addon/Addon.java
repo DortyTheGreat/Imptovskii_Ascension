@@ -34,6 +34,7 @@ public class Addon extends MeteorAddon {
     public static final Category CATEGORY = new Category("Dorty");
 	
 	public static final Category ProximaCombat = new Category("ProximaCombat 15-08-2023");
+	public static final Category ProximaRender = new Category("ProximaRender 15-08-2023");
 	
     public static final HudGroup HUD_GROUP = new HudGroup("Abobus2");
 
@@ -126,6 +127,7 @@ public class Addon extends MeteorAddon {
     public void onRegisterCategories() {
         Modules.registerCategory(CATEGORY);
 		Modules.registerCategory(ProximaCombat);
+		Modules.registerCategory(ProximaRender);
     }
 
     @Override
