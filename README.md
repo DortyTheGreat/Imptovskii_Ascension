@@ -1,15 +1,11 @@
-# Minecraft Utility Mod based on Meteor Addon
+# Minecraft Utility Mod based on Meteor.
 
-Данный мод предназначен для анархичных серверов в игре Minecraft, он является аддоном для другого мода - [Meteor Client](https://meteorclient.com/)
+Данный мод предназначен для анархичных серверов в игре Minecraft, он является аддоном для другого мода - [Meteor Client](https://meteorclient.com/). Так что для использования данного мода необходимо скачать версию Meteor Client, совместимую с текущей версией данного аддона.
 
-### How to use:  
-- Clone this project
-- Use this template to create new modules/commands
+### Особенности аддона  
+- PvE направленность аддона. Практически все модули созданы для PvE функций
+- Форк модулей других аддонов, в том числе: printer, Villager Roller, а также легендарного Proxima 
 
-- gradlew.bat
-- gradlew_build.bat to build
-- build\libs\ addon_name.jar 
-
-- src\ main \ recources \ fabric.mod.json - Инфа о моде
-
-- Run the mod with Meteor.
+- Хранение данных в файлах. Вместо того, чтобы хранить особо важные данные(файлы мапАртов, пароли) внутри конфигурационных файлов метеора, эти данные хранятся в отдельных файлах, так что делиться настройками вашего аддона будет проще.
+- Настройки по умолчанию выбираются так, чтобы максимизировать комфорт при игре с анти-читом, представленным на сервере [new-places](https://www.new-places.ru/)
+- В данном репозитории также представлены целые сборки модов, конфликтов с которыми обнаружено не было.
