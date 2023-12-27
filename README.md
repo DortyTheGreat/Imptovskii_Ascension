@@ -1,6 +1,6 @@
-# Meteor Addon Template
+# Minecraft Utility Mod based on Meteor Addon
 
-A template to allow easy usage of the Meteor Addon API.
+Данный мод предназначен для анархичных серверов в игре Minecraft, он является аддоном для другого мода - [Meteor Client](https://meteorclient.com/)
 
 ### How to use:  
 - Clone this project
