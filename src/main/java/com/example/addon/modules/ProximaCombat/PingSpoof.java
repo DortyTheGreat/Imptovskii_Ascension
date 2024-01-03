@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import com.example.addon.Addon;
 import com.example.addon.utils.Timer;
-import net.minecraft.network.packet.c2s.play.KeepAliveC2SPacket;
+import net.minecraft.network.packet.c2s.common.KeepAliveC2SPacket;
 
 public class PingSpoof extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

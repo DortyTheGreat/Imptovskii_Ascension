@@ -109,8 +109,8 @@ public class Addon extends MeteorAddon {
 		Modules.get().add(new WurstGlide());
 		Modules.get().add(new MapSaver());
 		
-		///Modules.get().add(new Suicide()); ахуенный  модуль, я правда не понял, что он делает
-		Modules.get().add(new VillagerRoller());
+		///Modules.get().add(new Suicide()); 
+		///Modules.get().add(new VillagerRoller());  03.01.2024 tempoary disabled
 		Modules.get().add(new Spin());
 		Modules.get().add(new Rocket());
         // Commands

@@ -42,7 +42,8 @@ dependencies {
     // Meteor
     modImplementation "meteordevelopment:meteor-client:${project.meteor_version}"
 	
-	modImplementation "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
+	// 1.20.2 test, idk what would happen ...
+	modImplementation "baritone:fabric:1.20.2-SNAPSHOT"
 
     //litematica
     modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"
