@@ -8,6 +8,7 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+
 repositories {
 
 	mavenCentral()
@@ -19,7 +20,7 @@ repositories {
 
     maven { url = "https://www.cursemaven.com" }
     maven { url = "https://masa.dy.fi/maven" }
-	
+
     maven {
         name = "Meteor Dev Releases"
         url = "https://maven.meteordev.org/releases"
@@ -30,24 +31,46 @@ repositories {
     }
 }
 
+configurations {
+    // include mods
+    modImplementation.extendsFrom(modInclude)
+    include.extendsFrom(modInclude)
+
+    // include libraries
+    implementation.extendsFrom(library)
+    shadow.extendsFrom(library)
+}
+
 dependencies {
     // Fabric
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	//mappings loom.officialMojangMappings()
-	
-    
+
+	modInclude fabricApi.module("fabric-resource-loader-v0", project.fapi_version)
+
+    // Compat fixes
+    modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
+
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Meteor
     modImplementation "meteordevelopment:meteor-client:${project.meteor_version}"
-	
-	// 1.20.2 test, idk what would happen ...
-	modImplementation "baritone:fabric:1.20.2-SNAPSHOT"
 
+	// 1.20.2 test, idk what would happen ...
+	modInclude  "baritone:fabric:1.20.2-SNAPSHOT"
     //litematica
     modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"
     modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.minecraft_version}:${project.malilib_version}"
+}
+
+
+remapJar{
+    // Add a nested mod jar to this task, the include configuration should be used for maven libraries and mods.
+    nestedJars.from file("baritone-add/baritone-1.20.4-SNAPSHOT.jar")
+    nestedJars.from file("baritone-add/baritone-1.20.4-API.jar")
+    // When enabled nested jars will be included with the output jar.
+    addNestedDependencies = true
 }
 
 processResources {
