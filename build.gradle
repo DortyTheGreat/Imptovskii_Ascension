@@ -59,7 +59,7 @@ dependencies {
 
 	// 1.20.2 test, idk what would happen ...
 	
-	modImplementation  "baritone:fabric:1.20.2-SNAPSHOT" 
+	modImplementation "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
     
 	//litematica
     modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"

@@ -44,7 +44,24 @@ public class AnvilName extends Module {
             .defaultValue("Steve")
             .build()
     );
-
+	
+	private final Setting<Integer> EColor = sgGeneral.add(new IntSetting.Builder()
+        .name("EColor")
+        .description("???")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(10000)
+        .build()
+    );
+	
+	private final Setting<Integer> UEColor = sgGeneral.add(new IntSetting.Builder()
+        .name("UEColor")
+        .description("???")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(10000)
+        .build()
+    );
 	
 	
 	private final Setting<Boolean> notifyUponPlace = sgExtra.add(new BoolSetting.Builder()
@@ -55,7 +72,7 @@ public class AnvilName extends Module {
     );
 	
     public AnvilName() {
-        super(Addon.CATEGORY, "waiting-auto-sign", "Automatically writes signs. The first sign's text will be used. Has a built-in delay");
+        super(Addon.CATEGORY, "Anvil-Name", "Automatically writes signs. The first sign's text will be used. Has a built-in delay");
     }
 
 
@@ -68,22 +85,9 @@ public class AnvilName extends Module {
 		Hashtable iWantThis = (Hashtable) f.get(obj); //IllegalAccessException
 		*/
 		
-		
-		/// Да, это ужас и уродство, но типо норм...
-		try{
-			Field f = event.screen.getClass().getDeclaredField("nameField"); //NoSuchFieldException
-			
-			f.setAccessible(true);
-		
-			try{
-				TextFieldWidget iWantThis = (TextFieldWidget) f.get(event.screen); //IllegalAccessException
-				iWantThis.setText(textOnAnvil.get());
-			}catch(IllegalAccessException e){
-				/// ...
-			}
-			
-		}catch(NoSuchFieldException e){
-			/// ...
+		event_ = event;
+		for(int i = 0; i < 10; ++i){
+			setTimeout(this::DoTheThing,1000 + 500 * i);
 		}
 		
 		
@@ -94,7 +98,39 @@ public class AnvilName extends Module {
         
     }
 	
-	
+	private void DoTheThing(){
+		if (notifyUponPlace.get()){info("Screen Opened");}
+		/// Да, это ужас и уродство, но типо норм...
+		try{
+			Field f = ((AnvilScreen)(event_.screen)).getClass().getDeclaredField("field_2821"); //NoSuchFieldException
+			/// https://maven.fabricmc.net/docs/yarn-23w51b+build.4/net/minecraft/client/gui/screen/ingame/AnvilScreen.html#nameField
+			
+			
+			///((AnvilScreen)(event_.screen)).nameField.setText(textOnAnvil.get());
+			
+			
+			f.setAccessible(true);
+			/**
+			
+			TO-DO:
+			rewrite to https://stackoverflow.com/questions/1196192/how-to-read-the-value-of-a-private-field-from-a-different-class-in-java
+			
+			*/
+			try{
+				TextFieldWidget iWantThis = (TextFieldWidget) f.get(((AnvilScreen)(event_.screen))); //IllegalAccessException
+				iWantThis.setText(textOnAnvil.get());
+				iWantThis.setEditableColor(EColor.get());
+				iWantThis.setUneditableColor(UEColor.get());
+				if (notifyUponPlace.get()){info("text changed");}
+			}catch(IllegalAccessException e){
+				/// ...
+				if (notifyUponPlace.get()){info("IllegalAccessException");}
+			}
+			
+		}catch(NoSuchFieldException e){
+			if (notifyUponPlace.get()){info("NoSuchFieldException");}
+		}
+	}
 }
 
 
