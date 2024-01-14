@@ -2,6 +2,7 @@
 
 package com.example.addon.modules;
 
+import com.example.addon.SHAccessor; 
 
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -105,6 +106,10 @@ import net.minecraft.village.*;
 import net.minecraft.village.MerchantInventory;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
+import net.minecraft.screen.ScreenHandler;
+
 public class TradeAura extends Module {
 
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -166,6 +171,31 @@ public class TradeAura extends Module {
 	
 	private MerchantScreenHandler MSH_g;
 	
+	public Object genericInvokeMethod(Object obj, String methodName, Object... params) {
+        int paramCount = params.length;
+        Method method;
+        Object requiredObj = null;
+        Class<?>[] classArray = new Class<?>[paramCount];
+        for (int i = 0; i < paramCount; i++) {
+            classArray[i] = params[i].getClass();
+        }
+        try {
+            method = obj.getClass().getDeclaredMethod(methodName, classArray);
+            method.setAccessible(true);
+            requiredObj = method.invoke(obj, params);
+        } catch (NoSuchMethodException e) {
+            info("NoSuchMethodException, check the code to update obfuscated name of method");
+        } catch (IllegalArgumentException e) {
+            info("IllegalArgumentException, check the code to update obfuscated name of method");
+        } catch (IllegalAccessException e) {
+            info("IllegalAccessException");
+        } catch (InvocationTargetException e) {
+            info("InvocationTargetException");
+        }
+
+        return requiredObj;
+    }
+	
 	@EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
 		if (!(event.screen instanceof MerchantScreen)) return;
@@ -177,13 +207,86 @@ public class TradeAura extends Module {
 		Object babaj;
 		try{
 			if ( !(FieldUtils.readField(MSH, "field_7863", true) instanceof Merchant merc) ) return;
-			MinecraftClient.getInstance().executeSync(() -> triggerTradeCheck(merc.getOffers(), merc));
+			///MinecraftClient.getInstance().executeSync(() -> syncing_func(MSH));
+			
+			FindItemResult resultEm = InvUtils.find(Items.EMERALD); 
+			if (!resultEm.found()){
+				if (Debug.get()){info("no emerald");}
+				return;
+			}
+			
+			info( MSH.quickMove(mc.player, resultEm.slot()).getName());
+			for(int i = 0; i < 500; ++i){
+				if (MSH.isValid(i)){
+					ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
+					
+					//info(emeraldIS.getName());
+					
+					info(MSH.getSlot(i).getStack().getName() + " " +  i + " " + MSH.getSlot(i).getIndex() + " " + MSH.getRevision() );
+					
+					///MSH.getSlot(i).setStack(emeraldIS);
+				}
+			}
+			ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
+			
+			SHAccessor SAVE_ME_PLS = new SHAccessor()
+			
+			//if (!(MSH instanceof SHAccessor SAVE_ME_PLS)){info("OH NO!!!!"); return;}
+			SAVE_ME_PLS.PublicinsertItem(emeraldIS, 0,1, false); // I really wanna use that
+			
+			
+			
+			
+			/// insertItem https://maven.fabricmc.net/docs/yarn-23w51b+build.4/net/minecraft/screen/ScreenHandler.html#insertItem(net.minecraft.item.ItemStack,int,int,boolean)
+			
+			genericInvokeMethod(MSH, "method_20214", 0, emeraldIS);
+			
+			MSH.updateToClient(); // ????
+			info("here2");
+			
+			
 		}catch(IllegalAccessException e){
 			info("IAE ex");
 		}
 		///Merchant tmp = MSH.merchant;
 	}
 	
+	private void syncing_func(MerchantScreenHandler MSH){
+		FindItemResult resultEm = InvUtils.find(Items.EMERALD); 
+		if (!resultEm.found()){
+			if (Debug.get()){info("no emerald");}
+			return;
+		}
+		
+		info( MSH.quickMove(mc.player, resultEm.slot()).getName());
+		for(int i = 0; i < 500; ++i){
+			if (MSH.isValid(i)){
+				ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
+				
+				//info(emeraldIS.getName());
+				
+				info(MSH.getSlot(i).getStack().getName() + " " +  i + " " + MSH.getSlot(i).getIndex() + " " + MSH.getRevision() );
+				
+				///MSH.getSlot(i).setStack(emeraldIS);
+			}
+		}
+		ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
+		
+		MSH.setStackInSlot(0, MSH.getRevision(), emeraldIS);
+		
+		MSH.updateToClient(); // ????
+		
+		///info(MSH.quickMove(mc.player, resultEm.slot()).getName()); ///THIS ACTUALLY CREATED GHOST ITEM!
+		
+		///MSH.getSlot(1).setStack(emeraldIS);
+		
+		info("here");
+		///InvUtils.swap(MSH.getSlot(0).getIndex(), resultEm.slot());
+		
+		///InvUtils.move().from(resultEm.slot()).to(MSH.getSlot(0).getIndex());
+		
+		///MSH.getSlot(0).setStack(emeraldIS);
+	}
 	
 	private int slotID = 0;
 	private ItemStack forem;
@@ -225,7 +328,7 @@ public class TradeAura extends Module {
 			slotID = -1;
 			///MSH_g = MSH;
 			for(int i = 0; i < 310; ++i){
-				setTimeout(this::DoTheThing,1000 + 100 * i);
+				///setTimeout(this::DoTheThing,1000 + 100 * i);
 				///MI.setStack(i, emeraldIS);
 			}
 			
