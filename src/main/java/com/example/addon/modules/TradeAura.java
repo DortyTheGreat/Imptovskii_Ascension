@@ -97,6 +97,14 @@ import java.io.*;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
 
+import net.minecraft.screen.MerchantScreenHandler;
+import net.minecraft.entity.passive.MerchantEntity;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import net.minecraft.client.gui.screen.ingame.MerchantScreen;
+import net.minecraft.village.*;
+import net.minecraft.village.MerchantInventory;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 public class TradeAura extends Module {
 
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -148,15 +156,44 @@ public class TradeAura extends Module {
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
         if (!(event.packet instanceof SetTradeOffersS2CPacket p)) return;
-        MinecraftClient.getInstance().executeSync(() -> triggerTradeCheck(p.getOffers()));
+        ///MinecraftClient.getInstance().executeSync(() -> triggerTradeCheck(p.getOffers()));
 		///TradeOfferList l = p.getOffers();
 		///for (TradeOffer offer : l) {
 		///	p.trade(offer);
 		///}
 		
     }
-
-    public void triggerTradeCheck(TradeOfferList l) {
+	
+	private MerchantScreenHandler MSH_g;
+	
+	@EventHandler
+    private void onOpenScreen(OpenScreenEvent event) {
+		if (!(event.screen instanceof MerchantScreen)) return;
+		
+		if (!(mc.player.currentScreenHandler instanceof MerchantScreenHandler MSH)) return;
+		Merchant tmp1;
+		MSH_g = MSH;
+		/// АХТУНГ! https://maven.fabricmc.net/docs/yarn-23w51b+build.4/net/minecraft/screen/MerchantScreenHandler.html#merchant
+		Object babaj;
+		try{
+			if ( !(FieldUtils.readField(MSH, "field_7863", true) instanceof Merchant merc) ) return;
+			MinecraftClient.getInstance().executeSync(() -> triggerTradeCheck(merc.getOffers(), merc));
+		}catch(IllegalAccessException e){
+			info("IAE ex");
+		}
+		///Merchant tmp = MSH.merchant;
+	}
+	
+	
+	private int slotID = 0;
+	private ItemStack forem;
+	private MerchantInventory MI;
+	
+    public void triggerTradeCheck(TradeOfferList l, Merchant merc) {
+		
+		MI = new MerchantInventory(merc);
+		
+		
         for (TradeOffer offer : l) {
             if (Debug.get()){info(String.format("Offer: %s", offer.getSellItem().toString()));}
             ItemStack sellItem = offer.getSellItem();
@@ -178,7 +215,21 @@ public class TradeAura extends Module {
 				continue;
 			}
 			
+			merc.trade(offer);
+			
 			ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
+			forem = emeraldIS;
+			
+			info(emeraldIS.getName());
+			
+			slotID = -1;
+			///MSH_g = MSH;
+			for(int i = 0; i < 310; ++i){
+				setTimeout(this::DoTheThing,1000 + 100 * i);
+				///MI.setStack(i, emeraldIS);
+			}
+			
+			info(MI.getTradeOffer().getSellItem().getName());
 			
 			ItemStack emptyIS = mc.player.getInventory().getStack(resultEmp.slot());
 			
@@ -202,6 +253,33 @@ public class TradeAura extends Module {
 		}
         
     }
+	
+	private void DoTheThing(){
+		slotID++;
+		info("slot " + slotID);
+		///info(slotID);
+		info(forem.getName());
+		
+		/// autofill https://maven.fabricmc.net/docs/yarn-23w51b+build.4/net/minecraft/screen/MerchantScreenHandler.html#autofill(int,net.minecraft.item.ItemStack)
+		try{
+			Method method = MSH_g.getClass().getDeclaredMethod("method_20214");
+			method.setAccessible(true);
+			method.invoke(slotID,forem);
+			
+			///MSH_g.autofill(slotID,forem);
+			///MI.setStack(slotID, forem);
+			info(MI.getTradeOffer().getSellItem().getName());
+		}catch(NoSuchMethodException e){
+			info("NoSuchMethodException, check the code to update obfuscated name of method");
+			
+		}catch(IllegalAccessException e){
+			info("IllegalAccessException, I have no idea how this could happen");
+		}catch(InvocationTargetException e){
+			info("InvocationTargetException, I have no idea how this could happen");
+		}
+		
+		
+	}
 }
 
 
