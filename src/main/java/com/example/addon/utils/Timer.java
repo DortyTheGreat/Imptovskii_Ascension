@@ -1,6 +1,6 @@
 package com.example.addon.utils;
 
-//import naturalism.addon.netherbane.modules.movement.Scaffold;
+//import com.example.addon.modules.ProximaScaffold; /// Господи, чашка, что это за хрень?
 import net.minecraft.util.math.MathHelper;
 
 public class Timer {
@@ -43,13 +43,13 @@ public class Timer {
         this.time = time;
     }
 
-    //private static Scaffold currentModule;
+    //private static ProximaScaffold currentModule;
     private static int priority;
     private static float timerSpeed;
     private static boolean active = false;
     private boolean tpsSync = false;
 	/*
-    public static void updateTimer(Scaffold module, int prio, float speed) {
+    public static void updateTimer(ProximaScaffold module, int prio, float speed) {
         if (module == currentModule) {
             priority = prio;
             timerSpeed = speed;
@@ -62,10 +62,11 @@ public class Timer {
         }
     }
 
-    public static void resetTimer(Scaffold module) {
+    public static void resetTimer(ProximaScaffold module) {
         if (currentModule == module) {
             active = false;
         }
     }
 	*/
+	
 }

@@ -114,6 +114,7 @@ public class Addon extends MeteorAddon {
 		Modules.get().add(new Spin());
 		Modules.get().add(new AnvilName());
 		Modules.get().add(new TradeAura());
+		Modules.get().add(new DortyScaffold());
 		Modules.get().add(new Rocket());
         // Commands
         
