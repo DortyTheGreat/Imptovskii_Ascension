@@ -98,6 +98,15 @@ public class Printer extends Module {
 			.max(100).sliderMax(100)
 			.build()
 	);
+	
+	private final Setting<Integer> min_blocks_inv = sgGeneral.add(new IntSetting.Builder()
+			.name("items to leave in inventory")
+			.description("Module wouldn't use every item from the slot. Leaving the slot at some (recommended) low amount of items. Intended for refill purposes")
+			.defaultValue(-1)
+			.min(-1).sliderMin(-1)
+			.max(65).sliderMax(65)
+			.build()
+	);
 
 	private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
 			.name("advanced")
@@ -353,7 +362,35 @@ public class Printer extends Module {
 
         return BuildUtils.place(pos, placeSide, airPlace.get(), swing.get(), rotate.get(), clientSide.get(), printing_range.get());
 	}
+	
+	/// Дорти 19.01.2024 TO-DO: убрать нестинг
+	private int check_item(ItemStack looking_stack, Item item, Supplier<Boolean> action, ItemStack requiredItemStack){
+		boolean isCreative = mc.player.getAbilities().creativeMode;
+		if ( !(!isCreative && looking_stack.getItem() == item && looking_stack.getCount() >= min_blocks_inv.get() ||
+			isCreative && looking_stack.getItem() == item &&
+			ItemStack.areEqual(mc.player.getMainHandStack(), requiredItemStack))) { return -1;}
+		
+		///InvUtils.swap(usedSlot, returnHand.get());
+		if (action.get()){ 
+			usedSlot = mc.player.getInventory().selectedSlot;
+			return 1;
+		}
+		/// InvUtils.swap(selectedSlot, returnHand.get());
+		return 0;
 
+		
+	}
+	
+	/// Добавляем условие на количество предметов в стаке
+	public FindItemResult special_find(Item... items) {
+        return InvUtils.find(itemStack -> {
+            for (Item item : items) {
+                if (itemStack.getItem() == item && itemStack.getCount() >= min_blocks_inv.get()) return true;
+            }
+            return false;
+        });
+    }
+	
 	private boolean switchItem(Item item, BlockState state, Supplier<Boolean> action) {
 		if (mc.player == null) return false;
 		
@@ -362,54 +399,28 @@ public class Printer extends Module {
 		ItemStack requiredItemStack = item.getDefaultStack();
 		NbtCompound nbt = BuildUtils.getNbtFromBlockState(requiredItemStack, state);
 		requiredItemStack.setNbt(nbt);
-		FindItemResult result = InvUtils.find(item); 
+		FindItemResult result = special_find(item); 
 		
 		
 		// TODO: Check if ItemStack nbt has BlockStateTag == BlockState required when in creative
-
-		if (
-			!isCreative &&
-			mc.player.getMainHandStack().getItem() == item ||
-			isCreative &&
-			mc.player.getMainHandStack().getItem() == item &&
-			
-			ItemStack.areEqual(
-			mc.player.getMainHandStack()
-			,
-			requiredItemStack)
-		) {
-			if (action.get()) {
-				usedSlot = mc.player.getInventory().selectedSlot;
-				return true;
-			} else return false;
-
-		} else if (
-			!isCreative &&
-			usedSlot != -1 &&
-			mc.player.getInventory().getStack(usedSlot).getItem() == item ||
-			isCreative &&
-			usedSlot != -1 &&
-			mc.player.getInventory().getStack(usedSlot).getItem() == item &&
-			ItemStack
-			.areEqual(
-			mc.player.getInventory().getStack(usedSlot),
-			requiredItemStack)
-		) {
-			InvUtils.swap(usedSlot, returnHand.get());
-			if (action.get()) {
-				return true;
-			} else {
-				InvUtils.swap(selectedSlot, returnHand.get());
-				return false;
-			}
-
-		} else if (
+		
+		// сначала из основной руки
+		int callback = check_item(mc.player.getMainHandStack(), item, action, requiredItemStack);
+		if (callback != -1) return (callback == 0) ? false : true;
+		
+		// затем из слота из которого уже пользовались??? (Зачем это было задумано автором, ведь использованный слот и есть основная рука...)
+		if (usedSlot != -1){
+			callback = check_item(mc.player.getInventory().getStack(usedSlot), item, action, requiredItemStack);
+			if (callback != -1) return (callback == 0) ? false : true;
+		}
+		
+		/// Этот ужас я когда-нибудь потом уберу. Что тут делал изначальный автор оставлю на размышление...
+		 if (
 			result.found() &&
 			!isCreative ||
 			result.found() &&
 			isCreative &&
 			result.found() &&
-			result.slot() != -1 &&
 			ItemStack
 			.areEqual(
 			requiredItemStack, 
