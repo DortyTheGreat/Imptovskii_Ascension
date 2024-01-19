@@ -1,14 +1,11 @@
-
-
 package com.example.addon.modules;
 
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.StringSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
+/// ^^^ MODULE BASIC IMPORTS ^^^
 
-import com.example.addon.Addon;
+
 import static com.example.addon.Utils.*; 
 
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
@@ -58,23 +55,37 @@ import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import net.minecraft.screen.ScreenHandler;
 
 import net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket;
+import net.minecraft.entity.Entity;
 
+import java.util.ArrayList;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.utils.entity.SortPriority;
+
+import net.minecraft.world.GameMode;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import net.minecraft.entity.passive.VillagerEntity;
+import meteordevelopment.meteorclient.utils.entity.TargetUtils;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Box;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Hand;
+import java.util.HashMap;
+import java.util.Map;
 public class TradeAura extends Module {
 
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgAura= settings.createGroup("Aura");
+
 	
 	
-	final SettingGroup sgExtra = settings.createGroup("Visible");
-	
-	
-	private final Setting<Boolean> Debug = sgExtra.add(new BoolSetting.Builder()
+	private final Setting<Boolean> Debug = sgGeneral.add(new BoolSetting.Builder()
             .name("Debug")
             .description("notify with a message to debug module")
             .defaultValue(false)
             .build()
     );
 	
-	private final Setting<Boolean> Close = sgExtra.add(new BoolSetting.Builder()
+	private final Setting<Boolean> Close = sgGeneral.add(new BoolSetting.Builder()
             .name("Close")
             .description("Close trading screen after trade")
             .defaultValue(false)
@@ -97,49 +108,67 @@ public class TradeAura extends Module {
         .build()
     );
 	
-    public TradeAura() {
-        super(Addon.CATEGORY, "Trade-Aura", "Trades with villagers for you");
+	private final Setting<Boolean> aura = sgAura.add(new BoolSetting.Builder()
+            .name("Villager-Aura")
+            .description("Clicks on Villagers in range of your vision")
+            .defaultValue(false)
+            .build()
+    );
+	
+	private final Setting<SortPriority> priority = sgAura.add(new EnumSetting.Builder<SortPriority>()
+        .name("priority")
+        .description("How to filter villagers within range.")
+        .defaultValue(SortPriority.ClosestAngle)
+		.visible(aura::get)
+        .build()
+    );
+	
+	private final Setting<Double> range = sgAura.add(new DoubleSetting.Builder()
+        .name("range")
+        .description("The maximum range for the villager to be clicked")
+        .defaultValue(4.5)
+        .min(0)
+        .sliderMax(6)
+		.visible(aura::get)
+        .build()
+    );
+	
+	private final Setting<Integer> forget = sgAura.add(new IntSetting.Builder()
+            .name("forget-after")
+            .description("How many ticks to wait before forgetting which villager to interact with")
+            .defaultValue(40)
+            .min(20)
+            .sliderMax(1000)
+			.visible(aura::get)
+            .build()
+    );
+	
+	private final Setting<Integer> maxTargets = sgAura.add(new IntSetting.Builder()
+        .name("max-targets")
+        .description("How many entities to load at once at most. (Just a memory stuff, idk it seems like a code smell though...)")
+        .defaultValue(1000)
+        .min(1)
+        .sliderRange(1, 1000)
+		.visible(aura::get)
+        .build()
+    );
+	
+    public TradeAura(Category cat) {
+        super(cat, "Trade-Aura", "Trades with villagers for you");
     }
-
-	/*
-    @EventHandler
-    private void onReceivePacket(PacketEvent.Receive event) {
-        if (!(event.packet instanceof SetTradeOffersS2CPacket p)) return;
-        ///MinecraftClient.getInstance().executeSync(() -> triggerTradeCheck(p.getOffers()));
-		///TradeOfferList l = p.getOffers();
-		///for (TradeOffer offer : l) {
-		///	p.trade(offer);
-		///}
-		
+	
+	
+	
+	private final List<Entity> targets = new ArrayList<>();
+	private final Map<Entity, Integer> VillagerCooldown = new HashMap<>();
+	
+	@Override
+    public void onActivate() {
+        targets.clear();
+		VillagerCooldown.clear();
     }
-	*/
 	
 	private MerchantScreenHandler MSH_g;
-	
-	public Object genericInvokeMethod(Object obj, String methodName, Object... params) {
-        int paramCount = params.length;
-        Method method;
-        Object requiredObj = null;
-        Class<?>[] classArray = new Class<?>[paramCount];
-        for (int i = 0; i < paramCount; i++) {
-            classArray[i] = params[i].getClass();
-        }
-        try {
-            method = obj.getClass().getDeclaredMethod(methodName, classArray);
-            method.setAccessible(true);
-            requiredObj = method.invoke(obj, params);
-        } catch (NoSuchMethodException e) {
-            info("NoSuchMethodException, check the code to update obfuscated name of method");
-        } catch (IllegalArgumentException e) {
-            info("IllegalArgumentException, check the code to update obfuscated name of method");
-        } catch (IllegalAccessException e) {
-            info("IllegalAccessException");
-        } catch (InvocationTargetException e) {
-            info("InvocationTargetException");
-        }
-
-        return requiredObj;
-    }
 	
 	@EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
@@ -161,13 +190,6 @@ public class TradeAura extends Module {
 				if (Debug.get()){info("no emerald");}
 				return;
 			}
-			
-			
-			
-			info("H1");
-			
-			
-			
 			
 			TradeOfferList Offers = MSH.getRecipes();
 			int num = 0;
@@ -203,68 +225,55 @@ public class TradeAura extends Module {
 	}
 	
 	
-	
-    /*public void triggerTradeCheck(TradeOfferList l, Merchant merc) {
+	private boolean entityCheck(Entity entity) {
+        if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
+        if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 		
-		MI = new MerchantInventory(merc);
 		
+        Box hitbox = entity.getBoundingBox();
+        if (!PlayerUtils.isWithin(
+            MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
+            MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
+            MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
+            range.get()
+        )) return false;
 		
-        for (TradeOffer offer : l) {
-            if (Debug.get()){info(String.format("Offer: %s", offer.getSellItem().toString()));}
-            ItemStack sellItem = offer.getSellItem();
-            if (!sellItem.isOf(Items.GOLDEN_CARROT)){
-				if (Debug.get()){info("This is not a carrot");}
-				continue;
-			}
-			/// https://maven.fabricmc.net/docs/yarn-20w51a+build.9/net/minecraft/village/TradeOffer.html#depleteBuyItems(net.minecraft.item.ItemStack,net.minecraft.item.ItemStack)
-            
-			FindItemResult resultEm = InvUtils.find(Items.EMERALD); 
-			FindItemResult resultEmp = InvUtils.find(Items.AIR); 
-			if (!resultEm.found()){
-				if (Debug.get()){info("no emerald");}
-				continue;
-			}
-			
-			if (!resultEmp.found()){
-				if (Debug.get()){info("no empty");}
-				continue;
-			}
-			
-			merc.trade(offer);
-			
-			ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
-			forem = emeraldIS;
-			
-			info(emeraldIS.getName());
-			
-			slotID = -1;
-			///MSH_g = MSH;
-			for(int i = 0; i < 310; ++i){
-				///setTimeout(this::DoTheThing,1000 + 100 * i);
-				///MI.setStack(i, emeraldIS);
-			}
-			
-			info(MI.getTradeOffer().getSellItem().getName());
-			
-			ItemStack emptyIS = mc.player.getInventory().getStack(resultEmp.slot());
-			
-			
-			
-			///use ???
-			
-			///info(Boolean.toString(offer.depleteBuyItems(emeraldIS, emptyIS)));
-        }
-        // ((MerchantScreenHandler)mc.player.currentScreenHandler).closeHandledScreen();
-        if (Close.get()){
-			
-			mc.player.closeHandledScreen();
-			//((MerchantScreenHandler)mc.player.currentScreenHandler).closeHandledScreen();
-		}
+		return entity instanceof VillagerEntity;
         
     }
-	*/
 	
-	
+	@EventHandler
+    private void onTick(TickEvent.Pre event) {
+        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
+		if (mc.player.currentScreenHandler instanceof MerchantScreenHandler) return; /// Если мы уже в экране жителя, но не нужно открывать новый
+		if (!aura.get()) return;
+        
+            targets.clear();
+            TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
+        
+		
+		
+		for (Entity targett : targets){
+			if (!VillagerCooldown.containsKey(targett)){
+				VillagerCooldown.put(targett, 0);
+				mc.interactionManager.interactEntity(mc.player, targett, Hand.MAIN_HAND);
+				break;
+			}
+				
+		}
+			
+		for (Map.Entry<Entity, Integer> e : new HashMap<>(VillagerCooldown).entrySet()) {
+			int time = e.getValue();
+			if (time > forget.get()) {
+				VillagerCooldown.remove(e.getKey());
+			}else {
+				VillagerCooldown.replace(e.getKey(), time + 1);
+			}
+		}
+			
+			
+		
+	}
 }
 
 

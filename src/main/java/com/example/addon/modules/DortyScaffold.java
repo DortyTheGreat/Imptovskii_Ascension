@@ -1,10 +1,13 @@
 package com.example.addon.modules;
-import com.example.addon.Addon;
+
+import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
+/// ^^^ MODULE BASIC IMPORTS ^^^
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
+
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.BlockItem;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -56,15 +59,13 @@ public class DortyScaffold extends Module {
         .name("Direction-Placement")
         .description("The direction to place the block")
         .defaultValue(Direction_ENUM.DOWN)
-        
         .build()
     );
 
     private int slot = -1;
-    private boolean worked = false;
 	/// https://github.com/RedCarlos26/HIGTools/blob/main/src/main/java/me/redcarlos/higtools/modules/main/ScaffoldPlus.java
-    public DortyScaffold() {
-        super(Addon.CATEGORY, "Dorty-Scaffold", "Scaffolds blocks under you. Skidded from HigwayTools");
+    public DortyScaffold(Category cat) {
+        super(cat, "Dorty-Scaffold", "Scaffolds blocks under you. Skidded from HigwayTools");
     }
 
     @EventHandler
@@ -81,10 +82,8 @@ public class DortyScaffold extends Module {
             if (keepY.get() != -1) ((IVec3d) pos).setY(keepY.get() - 1.0);
             BlockPos bpos = BlockPos.ofFloored(pos);
             if (!mc.world.getBlockState(bpos).isReplaceable()) {
-                worked = false;
                 continue;
             }
-            worked = true;
 
             boolean offHand = mc.player.getOffHandStack().getItem() instanceof BlockItem;
             boolean mainHand = mc.player.getMainHandStack().getItem() instanceof BlockItem;
@@ -123,10 +122,8 @@ public class DortyScaffold extends Module {
 			
             mc.player.networkHandler.sendPacket(
                 new PlayerInteractBlockC2SPacket(
-                    offHand ? Hand.OFF_HAND : Hand.MAIN_HAND,
-                    new BlockHitResult(pos, desired_direction, bpos, false),
-                    0
-                )
+                    offHand ? Hand.OFF_HAND : Hand.MAIN_HAND, /// Интересный момент, что это преоретизиурет именно вторую руку, а не основную. Стоит ли это фиксить?
+                    new BlockHitResult(pos, desired_direction, bpos, false),0)
             );
             slot = -1;
         }
@@ -135,10 +132,6 @@ public class DortyScaffold extends Module {
             mc.player.getInventory().selectedSlot = prevSlot;
             mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(prevSlot));
         }
-    }
-
-    public boolean hasWorked() {
-        return worked;
     }
 	
 	public enum Direction_ENUM {

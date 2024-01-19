@@ -1,13 +1,17 @@
 // https://github.com/kkllffaa/meteor-litematica-printer/blob/main/src/main/java/com/kkllffaa/meteor_litematica_printer/Printer.java
 package com.example.addon.modules;
 
+import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
+/// ^^^ MODULE BASIC IMPORTS ^^^
+
 import com.example.addon.BuildUtils; 
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
-import com.example.addon.Addon;
 
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
@@ -17,13 +21,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.settings.BlockListSetting;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.ColorSetting;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
@@ -47,23 +45,10 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
-
-import meteordevelopment.meteorclient.mixininterface.ISlot;
-import meteordevelopment.meteorclient.utils.render.PeekScreen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+
 
 
 
@@ -229,8 +214,8 @@ public class Printer extends Module {
 	// Might use liquidbounce RotationUtils to make it happen.	
 	// https://github.com/CCBlueX/LiquidBounce/blob/nextgen/src/main/kotlin/net/ccbluex/liquidbounce/utils/aiming/RotationsUtil.kt#L257
 
-	public Printer() {
-		super(Addon.CATEGORY, "litematica-printer", "Automatically prints open schematics");
+	public Printer(Category cat) {
+		super(cat, "litematica-printer", "Automatically prints open schematics");
 	}
 
     @Override
@@ -359,7 +344,7 @@ public class Printer extends Module {
     								printing_range.get(),
     								wantedSide
 							);
-
+		/// Возможно стоит использовать PlayerInteractBlockC2SPacket из DortyScaffold, для ротаций
         return BuildUtils.place(pos, placeSide, airPlace.get(), swing.get(), rotate.get(), clientSide.get(), printing_range.get());
 	}
 	
