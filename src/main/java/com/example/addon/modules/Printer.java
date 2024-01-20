@@ -401,11 +401,8 @@ public class Printer extends Module {
 		
 		/// Этот ужас я когда-нибудь потом уберу. Что тут делал изначальный автор оставлю на размышление...
 		 if (
-			result.found() &&
-			!isCreative ||
-			result.found() &&
-			isCreative &&
-			result.found() &&
+			result.found() && !isCreative ||
+			result.found() && isCreative &&
 			ItemStack
 			.areEqual(
 			requiredItemStack, 
@@ -439,7 +436,12 @@ public class Printer extends Module {
 					}
 
 				} else if (usedSlot != -1) {
-					InvUtils.move().from(result.slot()).toHotbar(usedSlot);
+					///InvUtils.move().from(result.slot()).toHotbar(usedSlot); /// подозреваю что именно эта строчка вызывает проблемы ...
+					
+					/// UPD. Ага. Это реально вызывает проблемы. Если в хотбаре мало предметов (~10), а в инвентаре есть тот же предмет, но его больше
+					/// то модуль попробует переместить предметы из инвентаря в хотбар. Теоретически уничтожая инвариант наличия 2 стопок. 
+					/// Я поменял на quickSwap, надеюсь это пофиксит проблему
+					InvUtils.quickSwap().fromId(usedSlot).to(result.slot());
 					InvUtils.swap(usedSlot, returnHand.get());
 
 					if (action.get()) {
