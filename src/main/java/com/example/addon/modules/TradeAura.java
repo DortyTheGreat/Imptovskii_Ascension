@@ -92,12 +92,12 @@ public class TradeAura extends Module {
             .build()
     );
 	
-	private final Setting<Integer> Index = sgGeneral.add(new IntSetting.Builder()
-        .name("Index")
-        .description("???")
-        .defaultValue(0)
+	private final Setting<Integer> MaxPrice = sgGeneral.add(new IntSetting.Builder()
+        .name("Max-Price")
+        .description("Max Price (in emeralds) for a deal")
+        .defaultValue(65)
         .min(0)
-        .sliderMax(10000)
+        .sliderMax(65)
         .build()
     );
 	
@@ -188,14 +188,22 @@ public class TradeAura extends Module {
 			FindItemResult resultEm = InvUtils.find(Items.EMERALD); 
 			if (!resultEm.found()){
 				if (Debug.get()){info("no emerald");}
+				if (Close.get()) mc.player.closeHandledScreen();
 				return;
 			}
 			
 			TradeOfferList Offers = MSH.getRecipes();
-			int num = 0;
+			int num = -1;
 			for (TradeOffer offer : Offers) {
+				num++;
+				//if (Debug.get()){info(String.format("Offer: %s", offer.getSellItem().toString()));}
 				
-				if (Debug.get()){info(String.format("Offer: %s", offer.getSellItem().toString()));}
+				ItemStack emeralds = offer.getOriginalFirstBuyItem(); /// на самом деле нужно сделать проверку на то, что второй итем - изумруд и что этот изумруд и т.д., но мне лень
+				
+				if (emeralds.isOf(Items.EMERALD) && emeralds.getCount() > MaxPrice.get()){
+					if (Debug.get()) info(offer.getSellItem().toString() + " too expensive");
+					continue;
+				}
 				
 				ItemStack sellItem = offer.getSellItem();
 				if (items.get().contains(sellItem.getItem())){
@@ -205,18 +213,15 @@ public class TradeAura extends Module {
 				}
 				/// https://maven.fabricmc.net/docs/yarn-20w51a+build.9/net/minecraft/village/TradeOffer.html#depleteBuyItems(net.minecraft.item.ItemStack,net.minecraft.item.ItemStack)
 				
-				num++;
+				
 			}
 			
 			
 			///ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
 			
+			if (Close.get()) mc.player.closeHandledScreen();
 			
-			if (Close.get()){
 			
-				mc.player.closeHandledScreen();
-				//((MerchantScreenHandler)mc.player.currentScreenHandler).closeHandledScreen();
-			}
 			
 		}catch(IllegalAccessException e){
 			info("IAE ex");
