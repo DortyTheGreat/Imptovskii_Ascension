@@ -71,11 +71,19 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import java.util.HashMap;
 import java.util.Map;
+
+import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
+
+import net.minecraft.util.Pair;
+import meteordevelopment.meteorclient.renderer.ShapeMode;
+
 public class TradeAura extends Module {
 
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAura= settings.createGroup("Aura");
-
+	private final SettingGroup sgRender= settings.createGroup("Render");
 	
 	
 	private final Setting<Boolean> Debug = sgGeneral.add(new BoolSetting.Builder()
@@ -153,14 +161,79 @@ public class TradeAura extends Module {
         .build()
     );
 	
+	private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+            .name("Render")
+            .description("Renders villagers that you've clicked")
+            .defaultValue(false)
+            .build()
+    );
+	
+	public final Setting<Double> fillOpacity = sgRender.add(new DoubleSetting.Builder()
+        .name("fill-opacity")
+        .description("The opacity of the shape fill.")
+        .visible(render::get)
+        .defaultValue(0.3)
+        .range(0, 1)
+        .sliderMax(1)
+        .build()
+    );
+	
+	private final Setting<SettingColor> defaultColor = sgRender.add(new ColorSetting.Builder()
+        .name("default-color")
+        .description("Color for unsynced actions")
+        .defaultValue(new SettingColor(0, 0, 0))
+        .visible(render::get)
+        .build()
+    );
+	
+	private final Setting<SettingColor> noEmeraldColor = sgRender.add(new ColorSetting.Builder()
+        .name("no-emerald-color")
+        .description("Color for no emeralds in inventory")
+        .defaultValue(new SettingColor(0, 0, 255))
+        .visible(render::get)
+        .build()
+    );
+	
+	private final Setting<SettingColor> noTradesColor = sgRender.add(new ColorSetting.Builder()
+        .name("no-trades")
+        .description("Color for no villager trades in trade list ")
+        .defaultValue(new SettingColor(255, 0, 0))
+        .visible(render::get)
+        .build()
+    );
+	
+	private final Setting<SettingColor> disabledTradeColor = sgRender.add(new ColorSetting.Builder()
+        .name("disabled-trade-color")
+        .description("Color for a trade on a cooldown")
+        .defaultValue(new SettingColor(255, 255, 0))
+        .visible(render::get)
+        .build()
+    );
+	
+	private final Setting<SettingColor> TooExpensiveColor = sgRender.add(new ColorSetting.Builder()
+        .name("too-expensive-color")
+        .description("Color for a high priced trade")
+        .defaultValue(new SettingColor(255, 0, 255))
+        .visible(render::get)
+        .build()
+    );
+	
+	private final Setting<SettingColor> yesPurchase = sgRender.add(new ColorSetting.Builder()
+        .name("purchase-color")
+        .description("Color for a successfull trade")
+        .defaultValue(new SettingColor(0, 255, 0))
+        .visible(render::get)
+        .build()
+    );
+	
     public TradeAura(Category cat) {
         super(cat, "Trade-Aura", "Trades with villagers for you");
     }
 	
 	
-	
+	/// Pair<Integer, String> pair = new Pair<>(1, "One");
 	private final List<Entity> targets = new ArrayList<>();
-	private final Map<Entity, Integer> VillagerCooldown = new HashMap<>();
+	private final Map<Entity, Pair<Integer, Color> > VillagerCooldown = new HashMap<>();
 	
 	@Override
     public void onActivate() {
@@ -173,12 +246,20 @@ public class TradeAura extends Module {
 	@EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
 		if (!(event.screen instanceof MerchantScreen)) return;
-		
 		if (!(mc.player.currentScreenHandler instanceof MerchantScreenHandler MSH)) return;
-
-		
 		MinecraftClient.getInstance().executeSync(() -> syncing_func(MSH));
-		///Merchant tmp = MSH.merchant;
+	}
+	
+	
+	
+	private Entity remember_entity; 
+	
+	private void updateColor(Color clr){
+		if (VillagerCooldown.containsKey(remember_entity)){
+			Pair new_pair = VillagerCooldown.get(remember_entity);
+			new_pair.setRight(clr);
+			VillagerCooldown.replace(remember_entity, new_pair);
+		}
 	}
 	
 	private void syncing_func(MerchantScreenHandler MSH){
@@ -189,32 +270,50 @@ public class TradeAura extends Module {
 			if (!resultEm.found()){
 				if (Debug.get()){info("no emerald");}
 				if (Close.get()) mc.player.closeHandledScreen();
+				
+				updateColor(noEmeraldColor.get());
+				
 				return;
 			}
 			
 			TradeOfferList Offers = MSH.getRecipes();
 			int num = -1;
+			updateColor(noTradesColor.get());
+			
+			boolean tradeHappened = false;
 			for (TradeOffer offer : Offers) {
 				num++;
 				//if (Debug.get()){info(String.format("Offer: %s", offer.getSellItem().toString()));}
 				
-				ItemStack emeralds = offer.getOriginalFirstBuyItem(); /// на самом деле нужно сделать проверку на то, что второй итем - изумруд и что этот изумруд и т.д., но мне лень
+				ItemStack emeralds = offer.getAdjustedFirstBuyItem(); /// на самом деле нужно сделать проверку на то, что второй итем - изумруд и что этот изумруд и т.д., но мне лень
 				
 				if (emeralds.isOf(Items.EMERALD) && emeralds.getCount() > MaxPrice.get()){
-					if (Debug.get()) info(offer.getSellItem().toString() + " too expensive");
+					if (Debug.get()) info(offer.getSellItem().toString() + " too expensive " + emeralds.getCount());
+					updateColor(TooExpensiveColor.get());
 					continue;
 				}
 				
 				ItemStack sellItem = offer.getSellItem();
 				if (items.get().contains(sellItem.getItem())){
 					if (Debug.get()){info("BUYING " + sellItem.getName());}
+					
+					if (offer.isDisabled()){
+						updateColor(disabledTradeColor.get());
+						continue;
+					}
+					
 					mc.player.networkHandler.sendPacket(new SelectMerchantTradeC2SPacket(num));
 					InvUtils.shiftClick().slotId(2);
+					tradeHappened = true;
+					
 				}
 				/// https://maven.fabricmc.net/docs/yarn-20w51a+build.9/net/minecraft/village/TradeOffer.html#depleteBuyItems(net.minecraft.item.ItemStack,net.minecraft.item.ItemStack)
 				
 				
 			}
+			
+			/// Хороший вопрос на тему того, как стоит раставить приоритеты цветов...
+			if (tradeHappened) updateColor(yesPurchase.get());
 			
 			
 			///ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
@@ -260,25 +359,63 @@ public class TradeAura extends Module {
 		
 		for (Entity targett : targets){
 			if (!VillagerCooldown.containsKey(targett)){
-				VillagerCooldown.put(targett, 0);
+				remember_entity = targett;
+				VillagerCooldown.put(targett, new Pair<>(0, defaultColor.get()) );
 				mc.interactionManager.interactEntity(mc.player, targett, Hand.MAIN_HAND);
+				
 				break;
 			}
 				
 		}
 			
-		for (Map.Entry<Entity, Integer> e : new HashMap<>(VillagerCooldown).entrySet()) {
-			int time = e.getValue();
+		for (Map.Entry<Entity, Pair<Integer, Color> > e : new HashMap<>(VillagerCooldown).entrySet()) {
+			int time = e.getValue().getLeft();
+			Color clr = e.getValue().getRight();
 			if (time > forget.get()) {
 				VillagerCooldown.remove(e.getKey());
 			}else {
-				VillagerCooldown.replace(e.getKey(), time + 1);
+				VillagerCooldown.replace(e.getKey(), new Pair<>(time + 1, clr));
 			}
 		}
 			
 			
 		
 	}
+	
+	@EventHandler
+    private void onRender3D(Render3DEvent event) {
+        if (!render.get()) return;
+		
+		for (Map.Entry<Entity, Pair<Integer, Color> > e : new HashMap<>(VillagerCooldown).entrySet()) {
+			Entity entity = e.getKey();
+			drawBoundingBox(event, entity, e.getValue().getRight());
+		}
+		
+
+    }
+	
+	
+	
+    private void drawBoundingBox(Render3DEvent event, Entity entity, Color color) {
+        
+		Color lineColor = new Color();
+		Color sideColor = new Color();
+	
+		lineColor.set(color);
+		sideColor.set(color).a((int) (sideColor.a * fillOpacity.get()));
+        
+
+        
+		double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
+		double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
+		double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
+
+		Box box = entity.getBoundingBox();
+		event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, ShapeMode.Both, 0);
+        
+    }
+	
+
 }
 
 
