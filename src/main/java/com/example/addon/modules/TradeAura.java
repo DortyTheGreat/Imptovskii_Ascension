@@ -293,6 +293,7 @@ public class TradeAura extends Module {
 					continue;
 				}
 				
+				
 				ItemStack sellItem = offer.getSellItem();
 				if (items.get().contains(sellItem.getItem())){
 					if (Debug.get()){info("BUYING " + sellItem.getName());}
