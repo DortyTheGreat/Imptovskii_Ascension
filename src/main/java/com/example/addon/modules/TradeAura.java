@@ -285,17 +285,20 @@ public class TradeAura extends Module {
 				num++;
 				//if (Debug.get()){info(String.format("Offer: %s", offer.getSellItem().toString()));}
 				
-				ItemStack emeralds = offer.getAdjustedFirstBuyItem(); /// на самом деле нужно сделать проверку на то, что второй итем - изумруд и что этот изумруд и т.д., но мне лень
 				
-				if (emeralds.isOf(Items.EMERALD) && emeralds.getCount() > MaxPrice.get()){
-					if (Debug.get()) info(offer.getSellItem().toString() + " too expensive " + emeralds.getCount());
-					updateColor(TooExpensiveColor.get());
-					continue;
-				}
 				
 				
 				ItemStack sellItem = offer.getSellItem();
 				if (items.get().contains(sellItem.getItem())){
+					
+					ItemStack emeralds = offer.getAdjustedFirstBuyItem(); /// на самом деле нужно сделать проверку на то, что второй итем - изумруд и что этот изумруд и т.д., но мне лень
+				
+					if (emeralds.isOf(Items.EMERALD) && emeralds.getCount() > MaxPrice.get()){
+						if (Debug.get()) info(offer.getSellItem().toString() + " too expensive " + emeralds.getCount());
+						updateColor(TooExpensiveColor.get());
+						continue;
+					}
+					
 					if (Debug.get()){info("BUYING " + sellItem.getName());}
 					
 					if (offer.isDisabled()){

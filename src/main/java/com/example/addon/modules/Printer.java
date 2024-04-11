@@ -48,7 +48,8 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 
-
+import net.minecraft.screen.Generic3x3ContainerScreenHandler;
+import net.minecraft.screen.GenericContainerScreenHandler;
 
 
 
@@ -234,7 +235,11 @@ public class Printer extends Module {
 			placed_fade.clear();
 			return;
 		}
-
+		
+		if (mc.player.currentScreenHandler instanceof Generic3x3ContainerScreenHandler) return;
+		if (mc.player.currentScreenHandler instanceof GenericContainerScreenHandler) return;
+		
+		
 		placed_fade.forEach(s -> s.setLeft(s.getLeft() - 1));
 		placed_fade.removeIf(s -> s.getLeft() <= 0);
 
@@ -311,7 +316,8 @@ public class Printer extends Module {
 
 					if (dirtgrass.get() && item == Items.GRASS_BLOCK)
 						item = Items.DIRT;
-					if (switchItem(item, state, () -> place(state, pos))) {
+					
+					if (switchItem(item, state, () -> place(state, pos) )) {
 						timer = 0;
 						placed++;
 						if (renderBlocks.get()) {
@@ -321,31 +327,40 @@ public class Printer extends Module {
 							return;
 						}
 					}
+					
 				}
 			});
 
 
 		} else timer++;
 	}
-
+	
+	public boolean placeholder(){
+		return true;
+	}
+	
 	public boolean place(BlockState required, BlockPos pos) {
-		
-		if (mc.player == null || mc.world == null) return false;
-		if (!mc.world.getBlockState(pos).isReplaceable()) return false;
-		
-		Direction wantedSide = advanced.get() ? dir(required) : null;
+		try{
+			if (mc.player == null || mc.world == null) return false;
+			if (!mc.world.getBlockState(pos).isReplaceable()) return false;
+			
+			Direction wantedSide = advanced.get() ? dir(required) : null;
 
 
-    	Direction placeSide = placeThroughWall.get() ? 
-    						BuildUtils.getPlaceSide(pos, wantedSide)
-    						: BuildUtils.getVisiblePlaceSide(
-    								pos, 
-    								required, 
-    								printing_range.get(),
-    								wantedSide
-							);
-		/// Возможно стоит использовать PlayerInteractBlockC2SPacket из DortyScaffold, для ротаций
-        return BuildUtils.place(pos, placeSide, airPlace.get(), swing.get(), rotate.get(), clientSide.get(), printing_range.get());
+			Direction placeSide = placeThroughWall.get() ? 
+								BuildUtils.getPlaceSide(pos, wantedSide)
+								: BuildUtils.getVisiblePlaceSide(
+										pos, 
+										required, 
+										printing_range.get(),
+										wantedSide
+								);
+			/// Возможно стоит использовать PlayerInteractBlockC2SPacket из DortyScaffold, для ротаций
+			return BuildUtils.place(pos, placeSide, airPlace.get(), swing.get(), rotate.get(), clientSide.get(), printing_range.get());
+		}catch(Exception ex){
+			info("Oops...");
+			return false;
+		}
 	}
 	
 	/// Дорти 19.01.2024 TO-DO: убрать нестинг
