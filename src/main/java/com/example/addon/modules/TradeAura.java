@@ -79,6 +79,8 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import net.minecraft.util.Pair;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 
+import static com.example.addon.Utils.*; 
+
 public class TradeAura extends Module {
 
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -96,9 +98,21 @@ public class TradeAura extends Module {
 	private final Setting<Boolean> Close = sgGeneral.add(new BoolSetting.Builder()
             .name("Close")
             .description("Close trading screen after trade")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
+	
+	private final Setting<Integer> time_before_close = sgGeneral.add(new IntSetting.Builder()
+        .name("time-before-close")
+        .description("time before closing villager window in ms")
+        .defaultValue(500)
+        .min(0)
+        .sliderMax(1000)
+		.visible(Close::get)
+        .build()
+    );
+	
+	
 	
 	private final Setting<Integer> MaxPrice = sgGeneral.add(new IntSetting.Builder()
         .name("Max-Price")
@@ -122,6 +136,18 @@ public class TradeAura extends Module {
             .defaultValue(false)
             .build()
     );
+	
+	private final Setting<Integer> ticks_to_wait = sgAura.add(new IntSetting.Builder()
+        .name("ticks_to_wait")
+        .description("time before clicking another villager window in ticks")
+        .defaultValue(40)
+        .min(0)
+        .sliderMax(100)
+		.visible(aura::get)
+        .build()
+    );
+	
+	
 	
 	private final Setting<SortPriority> priority = sgAura.add(new EnumSetting.Builder<SortPriority>()
         .name("priority")
@@ -235,10 +261,13 @@ public class TradeAura extends Module {
 	private final List<Entity> targets = new ArrayList<>();
 	private final Map<Entity, Pair<Integer, Color> > VillagerCooldown = new HashMap<>();
 	
+	private int ticker = 0;
+	
 	@Override
     public void onActivate() {
         targets.clear();
 		VillagerCooldown.clear();
+		ticker = 0;
     }
 	
 	private MerchantScreenHandler MSH_g;
@@ -321,9 +350,7 @@ public class TradeAura extends Module {
 			
 			
 			///ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
-			
-			if (Close.get()) mc.player.closeHandledScreen();
-			
+			if (Close.get()) {setTimeout(() -> {mc.player.closeHandledScreen();},time_before_close.get());}
 			
 			
 		}catch(IllegalAccessException e){
@@ -353,11 +380,15 @@ public class TradeAura extends Module {
 	@EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
+		
+		if (++ticker < ticks_to_wait.get() ) return;
+		ticker = 0;
+		
 		if (mc.player.currentScreenHandler instanceof MerchantScreenHandler) return; /// Если мы уже в экране жителя, но не нужно открывать новый
 		if (!aura.get()) return;
         
-            targets.clear();
-            TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
+		targets.clear();
+		TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
         
 		
 		
