@@ -4,7 +4,7 @@ package com.example.addon;
 import com.example.addon.hud.HudExample;
 import com.example.addon.modules.*;
 import com.example.addon.modules.ProximaCombat.*;
-import com.example.addon.modules.HighwayStuff.*;
+
 
 import com.mojang.logging.LogUtils;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
@@ -128,11 +128,7 @@ public class Addon extends MeteorAddon {
 		Modules.get().add(new AnchorBoomer());
 		Modules.get().add(new AutoTrapPlus());
 		
-		Modules.get().add(new AxisBorer());
-		Modules.get().add(new NegNegBorer());
-		Modules.get().add(new NegPosBorer());
-		Modules.get().add(new PosNegBorer());
-		Modules.get().add(new PosPosBorer());
+
 		
         // HUD
         Hud.get().register(HudExample.INFO);
