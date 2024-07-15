@@ -12,6 +12,9 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
+
+import meteordevelopment.meteorclient.settings.IntSetting;
+
 public class AutoBuild extends Module {
     public enum build {Portal, Penis, heart, Bunker, Platform, Wither, Swastika, Highway;}
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
@@ -20,295 +23,72 @@ public class AutoBuild extends Module {
     private final Setting<AutoBuild.build> buildMod = sgMisc.add(new EnumSetting.Builder<AutoBuild.build>().name("build").description(" ").defaultValue(AutoBuild.build.Penis).build());
     private final Setting<Boolean> rotate = sgMisc.add(new BoolSetting.Builder().name("rotate").description(" ").defaultValue(true).build());
     private final Setting<Boolean> togg = sgMisc.add(new BoolSetting.Builder().name("auto-toggle").description(" ").defaultValue(true).build());
-
+	
+	private final Setting<Integer> delay = sgMisc.add(new IntSetting.Builder()
+        .name("delay")
+        .description("delay in ticks")
+        .defaultValue(10)
+        .range(0, 1000)
+        .sliderRange(0, 100)
+        .build()
+    );
+	
+	private int dx = 1;
+	private int dz = 1;
+	
+	private int mode = 0;
+	
+	int timer = 0;
+	
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         place = false;
-        switch(buildMod.get()) {
-            case Penis -> {
-                p(2, 0, 0);
-                if (place) return;
-                p(2, 0, -1);
-                if (place) return;
-                p(2, 0, 1);
-                if (place) return;
-                p(2, 1, 0);
-                if (place) return;
-                p(2, 2, 0);
-                if (place) return;
-                p(2, 3, 0);
-                if (place) return;
-                if (togg.get()) {
-                    ChatUtils.info("Done");
-                    place = false;
-                    toggle();
-                }
-            }
-            case heart -> {
-                p(2, 0, 0);
-                if (place) return;
-                p(2, 1, 0);
-                if (place) return;
-                p(2, 1, 1);
-                if (place) return;
-                p(2, 1, -1);
-                if (place) return;
-                p(2, 2, 0);
-                if (place) return;
-                p(2, 2, 1);
-                if (place) return;
-                p(2, 2, -1);
-                if (place) return;
-                p(2, 2, -2);
-                if (place) return;
-                p(2, 2, 2);
-                if (place) return;
-                p(2, 3, -2);
-                if (place) return;
-                p(2, 3, -1);
-                if (place) return;
-                p(2, 3, 2);
-                if (place) return;
-                p(2, 3, 1);
-                if (place) return;
-                if (togg.get()) {
-                    ChatUtils.info("Done");
-                    place = false;
-                    toggle();
-                }
-            }
+		
+		timer += 1;
+		if (timer <= delay.get()) return;
+		
+        dx = (mode / 2) * 2 - 1;
+		dz = (mode % 2) * 2 - 1;
+		
+            
+		if (place) return;
+		b(2, 0, 0);
+		if (place) return;
+		b(2, 1, 0);
+		if (place) return;
+		b(2, 1, 1);
+		if (place) return;
+		b(2, 1, -1);
+		if (place) return;
+		h(2, 2, 0);
+		if (place) return;
+		h(2, 2, 1);
+		if (place) return;
+		h(2, 2, -1);
+		
+		mode += 1;
+		mode %= 4;
+		
+		timer = 0;
+		
+		if (togg.get()) {
+			ChatUtils.info("Done");
+			place = false;
+			toggle();
+		}
+		
+            
 
-            case Platform -> {
-                p(0, -1, 0);
-                if (place) return;
-                p(1, -1, 0);
-                if (place) return;
-                p(-1, -1, 0);
-                if (place) return;
-                p(0, -1, 1);
-                if (place) return;
-                p(0, -1, -1);
-                if (place) return;
-                p(1, -1, 1);
-                if (place) return;
-                p(1, -1, -1);
-                if (place) return;
-                p(-1, -1, 1);
-                if (place) return;
-                p(-1, -1, -1);
-                if (place) return;
-                if (togg.get()) {
-                    ChatUtils.info("Done");
-                    place = false;
-                    toggle();
-                }
-            }
+            
 
-            case Portal -> {
-                p(2, 0, 0);
-                if (place) return;
-                p(2, 0, 1);
-                if (place) return;
-                p(2, 1, 2);
-                if (place) return;
-                p(2, 2, 2);
-                if (place) return;
-                p(2, 3, 2);
-                if (place) return;
-                p(2, 4, 1);
-                if (place) return;
-                p(2, 4, 0);
-                if (place) return;
-                p(2, 3, -1);
-                if (place) return;
-                p(2, 2, -1);
-                if (place) return;
-                p(2, 1, -1);
-                if (place) return;
-                if (togg.get()) {
-                    ChatUtils.info("Done");
-                    place = false;
-                    toggle();
-                }
-            }
 
-            case Bunker -> {
-                p(1, -1, 0);
-                if (place) return;
-                p(-1, -1, 0);
-                if (place) return;
-                p(0, -1, 1);
-                if (place) return;
-                p(0, -1, -1);
-                if (place) return;
-                p(1, -1, 1);
-                if (place) return;
-                p(1, -1, -1);
-                if (place) return;
-                p(-1, -1, 1);
-                if (place) return;
-                p(-1, -1, -1);
-                if (place) return;
-                p(1, 0, 0);
-                if (place) return;
-                p(-1, 0, 0);
-                if (place) return;
-                p(0, 0, 1);
-                if (place) return;
-                p(0, 0, -1);
-                if (place) return;
-                p(-1, 1, 0);
-                if (place) return;
-                p(1, 1, 0);
-                if (place) return;
-                p(0, 1, 1);
-                if (place) return;
-                p(0, 1, -1);
-                if (place) return;
-                p(1, 2, 0);
-                if (place) return;
-                p(-1, 2, 0);
-                if (place) return;
-                p(0, 2, 1);
-                if (place) return;
-                p(0, 2, -1);
-                if (place) return;
-                p(0, 2, 0);
-                if (place) return;
-                p(0, 3, 0);
-                if (place) return;
-                p(0, 4, 0);
-                if (place) return;
-                p(1, 3, 0);
-                if (place) return;
-                p(0, 3, 1);
-                if (place) return;
-                p(0, 3, -1);
-                if (place) return;
-                p(-1, 3, 0);
-                if (place) return;
-                p(2, 0, 0);
-                if (place) return;
-                p(-2, 0, 0);
-                if (place) return;
-                p(0, 0, 2);
-                if (place) return;
-                p(0, 0, -2);
-                if (place) return;
-                p(1, 0, 1);
-                if (place) return;
-                p(1, 0, -1);
-                if (place) return;
-                p(-1, 0, 1);
-                if (place) return;
-                p(2, 1, 0);
-                if (place) return;
-                p(-2, 1, 0);
-                if (place) return;
-                p(0, 1, 2);
-                if (place) return;
-                p(0, 1, -2);
-                if (place) return;
-                p(1, 1, 1);
-                if (place) return;
-                p(1, 1, -1);
-                if (place) return;
-                p(-1, 1, 1);
-                if (place) return;
-                p(-1, 1, -1);
-                if (togg.get()) {
-                    ChatUtils.info("Done");
-                    place = false;
-                    toggle();
-                }
-            }
-
-            case Wither -> {
-                if (place) return;
-                b(2, 0, 0);
-                if (place) return;
-                b(2, 1, 0);
-                if (place) return;
-                b(2, 1, 1);
-                if (place) return;
-                b(2, 1, -1);
-                if (place) return;
-                h(2, 2, 0);
-                if (place) return;
-                h(2, 2, 1);
-                if (place) return;
-                h(2, 2, -1);
-                if (togg.get()) {
-                    ChatUtils.info("Done");
-                    place = false;
-                    toggle();
-                }
-            }
-
-            case Swastika -> {
-                p(1, 0, 0);
-                if (place) return;
-                p(1, 0, -1);
-                if (place) return;
-                p(1, 0, -2);
-                if (place) return;
-                p(1, 1, 0);
-                if (place) return;
-                p(1, 2, 0);
-                if (place) return;
-                p(1, 2, -1);
-                if (place) return;
-                p(1, 2, -2);
-                if (place) return;
-                p(1, 3, -2);
-                if (place) return;
-                p(1, 4, -2);
-                if (place) return;
-                p(1, 3, 0);
-                if (place) return;
-                p(1, 4, 0);
-                if (place) return;
-                p(1, 4, 1);
-                if (place) return;
-                p(1, 4, 2);
-                if (place) return;
-                p(1, 2, 1);
-                if (place) return;
-                p(1, 2, 2);
-                if (place) return;
-                p(1, 1, 2);
-                if (place) return;
-                p(1, 0, 2);
-                if (place) return;
-                if (togg.get()) {
-                    ChatUtils.info("Done");
-                    place = false;
-                    toggle();
-                }
-            }
-
-            case Highway -> {
-                if (place) return;
-                p(0, -1, 0);
-                if (place) return;
-                p(1, -1, 0);
-                if (place) return;
-                p(0, -1, -1);
-                if (place) return;
-                p(2, -1, 0);
-                if (place) return;
-                p(0, -1, -2);
-                if (togg.get()) {
-                    ChatUtils.info("Done");
-                    place = false;
-                    toggle();
-                }
-            }
-        }
+        
     }
 
     public AutoBuild() {super(Addon.CATEGORY, "auto-build", " ");}
-    private boolean p(int x, int y, int z) {
+    
+	
+	private boolean p(int x, int y, int z) {
         clearBlockPosition(x, y, z);BlockState blockState = mc.world.getBlockState(blockPos);
         if (!blockState.isReplaceable()) return true;
         if (BlockUtils.place(blockPos, InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 100)) {
@@ -318,6 +98,15 @@ public class AutoBuild extends Module {
     }
 
     private boolean b(int x, int y, int z) {
+		
+		x *= dx;
+		if (dz == -1){ // bruh swap. Java is good!
+			x = x + z;  
+			z = x - z;  
+			x = x - z;  
+		}
+			
+		
         clearBlockPosition(x, y, z);BlockState blockState = mc.world.getBlockState(blockPos);
         if (!blockState.isReplaceable()) return true;
         if (BlockUtils.place(blockPos, InvUtils.findInHotbar(Items.SOUL_SAND), rotate.get(), 100)) {
@@ -327,6 +116,14 @@ public class AutoBuild extends Module {
     }
 
     private boolean h(int x, int y, int z) {
+		
+		x *= dx;
+		if (dz == -1){ // bruh swap. Java is good!
+			x = x + z;  
+			z = x - z;  
+			x = x - z;  
+		}
+		
         clearBlockPosition(x, y, z);BlockState blockState = mc.world.getBlockState(blockPos);
         if (!blockState.isReplaceable()) return true;
         if (BlockUtils.place(blockPos, InvUtils.findInHotbar(Items.WITHER_SKELETON_SKULL), rotate.get(), 100)) {

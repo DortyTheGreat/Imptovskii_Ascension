@@ -103,6 +103,7 @@ public class Addon extends MeteorAddon {
         //Modules.get().add(new ModuleExample());
 		Modules.get().add(new sphere());
 		Modules.get().add(new ElytraPlusPlus());
+		Modules.get().add(new ElytraStop());
 		Modules.get().add(new WaitingAutoSign());
 		Modules.get().add(new AutoLogin());
 		Modules.get().add(new Printer(CATEGORY));
@@ -110,9 +111,10 @@ public class Addon extends MeteorAddon {
 		Modules.get().add(new ChatBot());
 		Modules.get().add(new WurstGlide());
 		Modules.get().add(new MapSaver());
+		Modules.get().add(new AutoNameTagFix());
 		Modules.get().add(new CustomFOV(CATEGORY));
 		Modules.get().add(new BookSaver(CATEGORY));
-		
+		Modules.get().add(new GrassColorPeek());
 		
 		///Modules.get().add(new Suicide()); 
 		///Modules.get().add(new VillagerRoller());  03.01.2024 tempoary disabled
